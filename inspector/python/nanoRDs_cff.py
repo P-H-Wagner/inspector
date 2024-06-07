@@ -8,12 +8,16 @@ from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
 
 # gen matching 
 from rds.inspector.inspector_cff import *
+from rds.inspector.inspectorGENSIM_cff import *
 
 #G: nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)  #purpose?
 
 # from PhysiscsTools.NanoAOD
-nanoSequence = cms.Sequence(nanoMetadata + globalTables)
+nanoSequence = cms.Sequence(nanoMetadata ) #+ globalTables)
 
 def nanoAOD_customizeGenMatching(process):
     process.nanoGenMatchingSequence = cms.Sequence( process.nanoSequence + inspectorSequence)
+    return process
+def nanoAOD_customizeGENSIMMatching(process):
+    process.nanoGENSIMMatchingSequence = cms.Sequence( process.nanoSequence + inspectorGENSIMSequence)
     return process

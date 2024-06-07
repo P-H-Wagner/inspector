@@ -13,7 +13,7 @@ args = parser.parse_args()
 ######################################
 
 # Is this an efficiency calulation? -> If so, take toy samples
-eff = False
+GENSIM = True
 
 #500 jobs per user on std queue
 nMaxJobs = 800
@@ -68,7 +68,7 @@ if args.channel == 'hb':
 
 if args.channel == 'b0':
 
-  if eff == True: # filter efficiency calculation
+  if GENSIM == True: # filter efficiency calculation
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_03_06_2024_22_52_56' 
     inputfiles = filesFromFolder(directory)
 
@@ -80,7 +80,7 @@ if args.channel == 'b0':
 
 if args.channel == 'bplus':
 
-  if eff == True: # filter efficiency calculation
+  if GENSIM == True: # filter efficiency calculation
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_03_06_2024_19_15_19' 
     inputfiles = filesFromFolder(directory)
 
@@ -91,8 +91,9 @@ if args.channel == 'bplus':
 
 if args.channel == 'bs':
 
-  if eff == True: # filter efficiency calculation
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47' 
+  if GENSIM == True: # filter efficiency calculation
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47'  # old filter
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_09_52_40'  # new filter
     inputfiles = filesFromFolder(directory)
   else:
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bs/bs.txt' #bs 
@@ -101,7 +102,7 @@ if args.channel == 'bs':
 
 if args.channel == 'lambdab':
 
-  if eff == True: # filter efficiency calculation
+  if GENSIM == True: # filter efficiency calculation
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/lambdab_fragment_04_06_2024_09_40_54' 
     inputfiles = filesFromFolder(directory)
 
@@ -141,6 +142,7 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
     elif "HOOK_N_EVENTS" in line: cfg.write(line.replace("HOOK_N_EVENTS", str(nevents)))
     elif "HOOK_FILE_IN" in line: cfg.write(line.replace("HOOK_FILE_IN", str(fin)))
     elif "HOOK_FILE_OUT" in line: cfg.write(line.replace("HOOK_FILE_OUT", fout))
+    elif "HOOK_GENSIM" in line: cfg.write(line.replace("HOOK_GENSIM", str(GENSIM)))
     else: cfg.write(line)
 
   temp.close()
@@ -176,7 +178,7 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
      ])
 
   print(command_sh_batch)
-  os.system(command_sh_batch)
+  #os.system(command_sh_batch)
 
 
 

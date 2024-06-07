@@ -88,12 +88,19 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 
 from rds.inspector.nanoRDs_cff import *
-process = nanoAOD_customizeGenMatching(process)
-process.nanoAOD_Bs_step= cms.Path(process.nanoGenMatchingSequence  )
+
+
+if HOOK_GENSIM:
+  process = nanoAOD_customizeGENSIMMatching(process)
+  process.nanoAOD_Bs_step= cms.Path(process.nanoGENSIMMatchingSequence)
+
+else: 
+
+  process = nanoAOD_customizeGenMatching(process)
+  process.nanoAOD_Bs_step= cms.Path(process.nanoGenMatchingSequence  )
 
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
-
 process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition

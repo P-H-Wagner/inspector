@@ -3,7 +3,8 @@ import FWCore.ParameterSet.Config as cms
 
 # TODO: put different samples into parser (flag from command line)
 # channel = 'sig'
-channel = 'hb'
+channel = 'bs'
+GENSIM = True
 
 import os
 
@@ -62,8 +63,33 @@ if channel == 'hb':
   inputfiles = filesFromFolder(directory)
 
 if channel == 'bplus':
-  txtFile = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bplus/bplus.txt' #data
-  inputfiles = filesFromTxt(txtFile)
+
+  if GENSIM == True:
+    directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_03_06_2024_19_15_19/" # old filter
+    inputfiles = filesFromFolder(directory)
+  else:
+    txtFile = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bplus/bplus.txt' #data
+    inputfiles = filesFromTxt(txtFile)[0:1]
+
+if channel == 'lambdab':
+
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/lambdab/lambdab.txt' #bs 
+  inputfiles = filesFromTxt(directory)
+  naming = 'lambdab'
+
+if channel == 'bs':
+
+  if GENSIM == True: 
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/'  # old filter
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_09_52_40/'  # new filter
+    inputfiles = filesFromFolder(directory)
+    naming = 'bs'
+
+  else:
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bs/bs.txt' #bs 
+    inputfiles = filesFromTxt(directory)
+    naming = 'bs'
+
 
 if channel == 'data':
   txtFile = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/data/BPark_2018_D/BPark_2018D.txt' #data
@@ -77,7 +103,8 @@ process.source = cms.Source(
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/50002/D0AE1369-0D7B-554C-BBB9-7B324AACCABD.root'), #data file to compare with riccs MA code
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/50002/36CD4F31-A249-DF49-A3FF-32DCA7223D09.root'), #10
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/40000/56D888ED-EB2C-B24F-A5A0-8D162DAFFA25.root'), #7
-    fileNames = cms.untracked.vstring(inputfiles),# all_signals_HbToDsPhiKKPiMuNu_MT_0.root'), #automized case
+    #fileNames = cms.untracked.vstring(inputfiles),# all_signals_HbToDsPhiKKPiMuNu_MT_0.root'), #automized case
+    fileNames = cms.untracked.vstring("file:/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/bs_fragment_chunk3_03_06_2024_19_15_47.root"),
     secondaryFileNames = cms.untracked.vstring(),
     #skipEvents=cms.untracked.uint32(0) # skip first n events   
 )
@@ -105,7 +132,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
         filterName = cms.untracked.string('')
     ),
     #fileName = cms.untracked.string('file:/scratch/pahwagne/nanoAOD/test.root' ),
-    fileName = cms.untracked.string('file:/work/pahwagne/test/nanotest.root'), #used for local tests
+    fileName = cms.untracked.string('file:inspectortest.root'), #used for local tests
     outputCommands = cms.untracked.vstring(
       'drop *',
       "keep nanoaodFlatTable_*Table_*_*",     # event data
@@ -126,9 +153,13 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 from rds.inspector.nanoRDs_cff import *
 
 #can only gen match on mc
-process = nanoAOD_customizeGenMatching(process) 
-# Path and EndPath definitions
-process.nanoAOD_Bs_step= cms.Path(process.nanoGenMatchingSequence)
+if GENSIM:
+  process = nanoAOD_customizeGENSIMMatching(process) 
+  process.nanoAOD_Bs_step= cms.Path(process.nanoGENSIMMatchingSequence)
+else:
+  process = nanoAOD_customizeGenMatching(process) 
+  # Path and EndPath definitions
+  process.nanoAOD_Bs_step= cms.Path(process.nanoGenMatchingSequence)
 
 
 #process.nanoAOD_Bs_step= cms.Path(process.triggerSequence) ## to run only Trigger.cc for debugging
