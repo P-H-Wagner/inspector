@@ -55,7 +55,20 @@ inline void printDaughters(const auto mom){
   }
   return;
 }
+///////////////////////////////////////////////////////////////////////////////////
+// function which prints all moms 
 
+inline void printMothers(const auto dau){
+
+  for(size_t momIdx = 0; momIdx < dau->numberOfMothers(); ++momIdx){
+    std::cout << " Now dau is: "<< dau->pdgId() << std::endl;
+    std::cout << " And has Nr of moms: "<< dau->numberOfMothers() << std::endl;
+    std::cout << " Accessing mom: " << dau->mother(momIdx)->pdgId() << std::endl;
+    printMothers(dau->mother(momIdx)); 
+  }
+  std::cout << "done... returning back" << std::endl;
+  return;
+}
 ///////////////////////////////////////////////////////////////////////////////////
 // function which checks if a genParticle has a certain ancestor 
 

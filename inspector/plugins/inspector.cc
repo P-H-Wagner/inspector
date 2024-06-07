@@ -329,7 +329,7 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
                }
              }
             
-             if (bMotherId == 0) break; // no b mother found
+             if (bMotherId == 0) continue; // no b mother found
 
              // Even if the mu is not required to come brom the b mother directly (would be signal case)
              // if it comes from another D meson (double charm background case), we still want
@@ -881,182 +881,182 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
 
              //if we reached this point we have found our gen match and we can stop the loop
 
-             break;
-
+             goto end;
              //////////////////////////////////////////////////
 
            }//close gen matching pi loop 
-          break;
+          //break;
           }//close gen matching k2 loop 
-        break;
+        //break;
         } //close gen matching k1 loop
-      break;
+      //break;
       } //close gen matching mu loop
 
       //if (genMatchSuccess == 0) continue; 
 
-      gen.addUserInt("sig",sigId);
-      gen.addUserInt("b_mother_id",bId);
-      gen.addUserInt("gen_match_success",genMatchSuccess);
-
-      if (genMatchSuccess == 0){
-        // no gen match, we store nans
-
-        //prepare a dummy (This does not work!! can not add the empty vector as candidate even it compiles.. why??)
-        //reco::GenParticle dummy;
-        //math::PtEtaPhiMLorentzVector dummyP4(std::nan(""),std::nan("") ,std::nan("") ,std::nan(""));
-        //dummy.setP4(dummyP4); 
-        //dummy.setCharge(-9999); 
-        //dummy.setPdgId( -9999); 
-        //edm::Ptr<reco::GenParticle> empty(&dummy, 0);
-
-        //gen.addUserCand("mu_gen"          ,empty);
-        //gen.addUserCand("k1_gen"          ,empty);
-        //gen.addUserCand("k2_gen"          ,empty);
-        //gen.addUserCand("pi_gen"          ,empty);
-
-        //well, then its a little more tedious
-        gen.addUserFloat("m2_miss_gen"    ,std::nan(""));
-        gen.addUserFloat("pt_miss_gen"    ,std::nan(""));
-        gen.addUserFloat("q2_gen"         ,std::nan(""));
-        gen.addUserFloat("e_star_gen"     ,std::nan(""));
-        gen.addUserFloat("e_gamma_gen"    ,std::nan(""));
-
-        gen.addUserFloat("mu_gen_px"      ,std::nan(""));
-        gen.addUserFloat("mu_gen_py"      ,std::nan(""));
-        gen.addUserFloat("mu_gen_pz"      ,std::nan(""));
-        gen.addUserFloat("mu_gen_pt"      ,std::nan(""));
-        gen.addUserFloat("mu_gen_eta"     ,std::nan(""));
-        gen.addUserFloat("mu_gen_phi"     ,std::nan(""));
-        gen.addUserFloat("mu_gen_m"    ,std::nan(""));
-        gen.addUserFloat("mu_gen_charge"  ,std::nan(""));
-        gen.addUserInt(  "mu_gen_pdgid"   ,-9999);
-
-        gen.addUserFloat("k1_gen_px"      ,std::nan(""));
-        gen.addUserFloat("k1_gen_py"      ,std::nan(""));
-        gen.addUserFloat("k1_gen_pz"      ,std::nan(""));
-        gen.addUserFloat("k1_gen_pt"      ,std::nan(""));
-        gen.addUserFloat("k1_gen_eta"     ,std::nan(""));
-        gen.addUserFloat("k1_gen_phi"     ,std::nan(""));
-        gen.addUserFloat("k1_gen_m"    ,std::nan(""));
-        gen.addUserFloat("k1_gen_charge"  ,std::nan(""));
-        gen.addUserInt(  "k1_gen_pdgid"   ,-9999);
-
-        gen.addUserFloat("k2_gen_px"      ,std::nan(""));
-        gen.addUserFloat("k2_gen_py"      ,std::nan(""));
-        gen.addUserFloat("k2_gen_pz"      ,std::nan(""));
-        gen.addUserFloat("k2_gen_pt"      ,std::nan(""));
-        gen.addUserFloat("k2_gen_eta"     ,std::nan(""));
-        gen.addUserFloat("k2_gen_phi"     ,std::nan(""));
-        gen.addUserFloat("k2_gen_m"    ,std::nan(""));
-        gen.addUserFloat("k2_gen_charge"  ,std::nan(""));
-        gen.addUserInt(  "k2_gen_pdgid"   ,-9999);
-
-        gen.addUserFloat("pi_gen_px"      ,std::nan(""));
-        gen.addUserFloat("pi_gen_py"      ,std::nan(""));
-        gen.addUserFloat("pi_gen_pz"      ,std::nan(""));
-        gen.addUserFloat("pi_gen_pt"      ,std::nan(""));
-        gen.addUserFloat("pi_gen_eta"     ,std::nan(""));
-        gen.addUserFloat("pi_gen_phi"     ,std::nan(""));
-        gen.addUserFloat("pi_gen_m"    ,std::nan(""));
-        gen.addUserFloat("pi_gen_charge"  ,std::nan(""));
-        gen.addUserInt(  "pi_gen_pdgid"   ,-9999);
-
-        gen.addUserFloat("phi_gen_px"     ,std::nan(""));
-        gen.addUserFloat("phi_gen_py"     ,std::nan(""));
-        gen.addUserFloat("phi_gen_pz"     ,std::nan(""));
-        gen.addUserFloat("phi_gen_pt"     ,std::nan(""));
-        gen.addUserFloat("phi_gen_eta"    ,std::nan(""));
-        gen.addUserFloat("phi_gen_phi"    ,std::nan(""));
-        gen.addUserFloat("tv_x_gen"       ,std::nan(""));
-        gen.addUserFloat("tv_y_gen"       ,std::nan(""));
-        gen.addUserFloat("tv_z_gen"       ,std::nan(""));
-        gen.addUserFloat("phi_gen_charge" ,std::nan(""));
-        gen.addUserInt(  "phi_gen_pdgid"  ,-9999);
-
-        gen.addUserFloat("ds_gen_px"      ,std::nan(""));
-        gen.addUserFloat("ds_gen_py"      ,std::nan(""));
-        gen.addUserFloat("ds_gen_pz"      ,std::nan(""));
-        gen.addUserFloat("ds_gen_pt"      ,std::nan(""));
-        gen.addUserFloat("ds_gen_eta"     ,std::nan(""));
-        gen.addUserFloat("ds_gen_phi"     ,std::nan(""));
-        gen.addUserFloat("sv_x_gen"       ,std::nan(""));
-        gen.addUserFloat("sv_y_gen"       ,std::nan(""));
-        gen.addUserFloat("sv_z_gen"       ,std::nan(""));
-        gen.addUserFloat("ds_gen_charge"  ,std::nan(""));
-        gen.addUserInt(  "ds_gen_pdgid"   ,-9999);
-        gen.addUserFloat(  "ds_gen_boost"   ,std::nan(""));
-
-        gen.addUserFloat("bs_gen_px"      ,std::nan(""));
-        gen.addUserFloat("bs_gen_py"      ,std::nan(""));
-        gen.addUserFloat("bs_gen_pz"      ,std::nan(""));
-        gen.addUserFloat("bs_gen_pt"      ,std::nan(""));
-        gen.addUserFloat("bs_gen_eta"     ,std::nan(""));
-        gen.addUserFloat("bs_gen_phi"     ,std::nan(""));
-
-        gen.addUserFloat("pv_x_gen"       ,std::nan(""));
-        gen.addUserFloat("pv_y_gen"       ,std::nan(""));
-        gen.addUserFloat("pv_z_gen"       ,std::nan(""));
-        gen.addUserFloat("scnd_pv_x_gen"  ,std::nan("")); //This is the bs production vertex!
-        gen.addUserFloat("scnd_pv_y_gen"  ,std::nan(""));
-        gen.addUserFloat("scnd_pv_z_gen"  ,std::nan(""));
-        gen.addUserInt("scnd_pv_idx_gen"  ,-9999);
-
-
-        gen.addUserFloat("bs_gen_charge"  ,std::nan(""));
-        gen.addUserInt(  "bs_gen_pdgid"   ,-9999);
-        gen.addUserFloat("b_boost_gen" ,std::nan(""));
-        gen.addUserFloat("b_boost_gen_pt" ,std::nan(""));
-        gen.addUserFloat("b_boost_gen_eta" ,std::nan(""));
-        gen.addUserFloat("b_boost_gen_phi" ,std::nan(""));
-
-        gen.addUserInt("disc_is_negative_gen", -9999); 
-        gen.addUserFloat("disc_negativity_gen", std::nan("")); 
-
-        gen.addUserFloat("bs_gen_lhcb_pt", std::nan(""));
-        gen.addUserFloat("bs_gen_lhcb_eta", std::nan(""));
-        gen.addUserFloat("bs_gen_lhcb_phi", std::nan(""));
-
-        gen.addUserFloat("fv_x_gen"       ,std::nan(""));
-        gen.addUserFloat("fv_y_gen"       ,std::nan(""));
-        gen.addUserFloat("fv_z_gen"       ,std::nan(""));
-
-        gen.addUserFloat("angMuWGen"      ,std::nan(""));
-        gen.addUserFloat("cosMuWGen"      ,std::nan(""));
-        gen.addUserFloat("cosMuWGenLhcb"      ,std::nan(""));
-        gen.addUserFloat("cosMuWGenReco1"      ,std::nan(""));
-        gen.addUserFloat("cosMuWGenReco2"      ,std::nan(""));
-
-        gen.addUserFloat("angPiK1Gen"     ,std::nan(""));
-        gen.addUserFloat("angPiK2Gen"     ,std::nan(""));
-        gen.addUserFloat("cosPiK1Gen"     ,std::nan(""));
-        gen.addUserFloat("cosPiK2Gen"     ,std::nan(""));
-
-        gen.addUserFloat("angPhiDsGen"    ,std::nan(""));
-        gen.addUserFloat("angPiDsGen"     ,std::nan(""));
-        gen.addUserFloat("cosPhiDsGen"    ,std::nan(""));
-        gen.addUserFloat("cosPiDsGen"     ,std::nan(""));
-        gen.addUserFloat("cosPiDsGenLhcb"     ,std::nan(""));
-
-        gen.addUserFloat("angPlaneBsGen"  ,std::nan(""));
-        gen.addUserFloat("cosPlaneBsGen"  ,std::nan(""));
-        gen.addUserFloat("angPlaneDsGen"  ,std::nan(""));
-        gen.addUserFloat("cosPlaneDsGen"  ,std::nan(""));
-
-        //gen.addUserFloat("mu_iso_03_gen"     ,std::nan(""));
-        //gen.addUserFloat("mu_iso_04_gen"     ,std::nan(""));
-        //gen.addUserFloat("mu_rel_iso_03_gen" ,std::nan(""));
-        //gen.addUserFloat("mu_rel_iso_04_gen" ,std::nan(""));
-
-
-      }
-
-      /////////////////////// END OF VARIABLE DEFINITION //////////////////////
-
-      //append candidate at the end of our return value :)
-      //ret_value can be a vector!!
-      ret_value->emplace_back(gen);
-      //ret_value_gen->emplace_back(gen);
+      end: 
+        gen.addUserInt("sig",sigId);
+        gen.addUserInt("b_mother_id",bId);
+        gen.addUserInt("gen_match_success",genMatchSuccess);
+  
+        if (genMatchSuccess == 0){
+          // no gen match, we store nans
+  
+          //prepare a dummy (This does not work!! can not add the empty vector as candidate even it compiles.. why??)
+          //reco::GenParticle dummy;
+          //math::PtEtaPhiMLorentzVector dummyP4(std::nan(""),std::nan("") ,std::nan("") ,std::nan(""));
+          //dummy.setP4(dummyP4); 
+          //dummy.setCharge(-9999); 
+          //dummy.setPdgId( -9999); 
+          //edm::Ptr<reco::GenParticle> empty(&dummy, 0);
+  
+          //gen.addUserCand("mu_gen"          ,empty);
+          //gen.addUserCand("k1_gen"          ,empty);
+          //gen.addUserCand("k2_gen"          ,empty);
+          //gen.addUserCand("pi_gen"          ,empty);
+  
+          //well, then its a little more tedious
+          gen.addUserFloat("m2_miss_gen"    ,std::nan(""));
+          gen.addUserFloat("pt_miss_gen"    ,std::nan(""));
+          gen.addUserFloat("q2_gen"         ,std::nan(""));
+          gen.addUserFloat("e_star_gen"     ,std::nan(""));
+          gen.addUserFloat("e_gamma_gen"    ,std::nan(""));
+  
+          gen.addUserFloat("mu_gen_px"      ,std::nan(""));
+          gen.addUserFloat("mu_gen_py"      ,std::nan(""));
+          gen.addUserFloat("mu_gen_pz"      ,std::nan(""));
+          gen.addUserFloat("mu_gen_pt"      ,std::nan(""));
+          gen.addUserFloat("mu_gen_eta"     ,std::nan(""));
+          gen.addUserFloat("mu_gen_phi"     ,std::nan(""));
+          gen.addUserFloat("mu_gen_m"    ,std::nan(""));
+          gen.addUserFloat("mu_gen_charge"  ,std::nan(""));
+          gen.addUserInt(  "mu_gen_pdgid"   ,-9999);
+  
+          gen.addUserFloat("k1_gen_px"      ,std::nan(""));
+          gen.addUserFloat("k1_gen_py"      ,std::nan(""));
+          gen.addUserFloat("k1_gen_pz"      ,std::nan(""));
+          gen.addUserFloat("k1_gen_pt"      ,std::nan(""));
+          gen.addUserFloat("k1_gen_eta"     ,std::nan(""));
+          gen.addUserFloat("k1_gen_phi"     ,std::nan(""));
+          gen.addUserFloat("k1_gen_m"    ,std::nan(""));
+          gen.addUserFloat("k1_gen_charge"  ,std::nan(""));
+          gen.addUserInt(  "k1_gen_pdgid"   ,-9999);
+  
+          gen.addUserFloat("k2_gen_px"      ,std::nan(""));
+          gen.addUserFloat("k2_gen_py"      ,std::nan(""));
+          gen.addUserFloat("k2_gen_pz"      ,std::nan(""));
+          gen.addUserFloat("k2_gen_pt"      ,std::nan(""));
+          gen.addUserFloat("k2_gen_eta"     ,std::nan(""));
+          gen.addUserFloat("k2_gen_phi"     ,std::nan(""));
+          gen.addUserFloat("k2_gen_m"    ,std::nan(""));
+          gen.addUserFloat("k2_gen_charge"  ,std::nan(""));
+          gen.addUserInt(  "k2_gen_pdgid"   ,-9999);
+  
+          gen.addUserFloat("pi_gen_px"      ,std::nan(""));
+          gen.addUserFloat("pi_gen_py"      ,std::nan(""));
+          gen.addUserFloat("pi_gen_pz"      ,std::nan(""));
+          gen.addUserFloat("pi_gen_pt"      ,std::nan(""));
+          gen.addUserFloat("pi_gen_eta"     ,std::nan(""));
+          gen.addUserFloat("pi_gen_phi"     ,std::nan(""));
+          gen.addUserFloat("pi_gen_m"    ,std::nan(""));
+          gen.addUserFloat("pi_gen_charge"  ,std::nan(""));
+          gen.addUserInt(  "pi_gen_pdgid"   ,-9999);
+  
+          gen.addUserFloat("phi_gen_px"     ,std::nan(""));
+          gen.addUserFloat("phi_gen_py"     ,std::nan(""));
+          gen.addUserFloat("phi_gen_pz"     ,std::nan(""));
+          gen.addUserFloat("phi_gen_pt"     ,std::nan(""));
+          gen.addUserFloat("phi_gen_eta"    ,std::nan(""));
+          gen.addUserFloat("phi_gen_phi"    ,std::nan(""));
+          gen.addUserFloat("tv_x_gen"       ,std::nan(""));
+          gen.addUserFloat("tv_y_gen"       ,std::nan(""));
+          gen.addUserFloat("tv_z_gen"       ,std::nan(""));
+          gen.addUserFloat("phi_gen_charge" ,std::nan(""));
+          gen.addUserInt(  "phi_gen_pdgid"  ,-9999);
+  
+          gen.addUserFloat("ds_gen_px"      ,std::nan(""));
+          gen.addUserFloat("ds_gen_py"      ,std::nan(""));
+          gen.addUserFloat("ds_gen_pz"      ,std::nan(""));
+          gen.addUserFloat("ds_gen_pt"      ,std::nan(""));
+          gen.addUserFloat("ds_gen_eta"     ,std::nan(""));
+          gen.addUserFloat("ds_gen_phi"     ,std::nan(""));
+          gen.addUserFloat("sv_x_gen"       ,std::nan(""));
+          gen.addUserFloat("sv_y_gen"       ,std::nan(""));
+          gen.addUserFloat("sv_z_gen"       ,std::nan(""));
+          gen.addUserFloat("ds_gen_charge"  ,std::nan(""));
+          gen.addUserInt(  "ds_gen_pdgid"   ,-9999);
+          gen.addUserFloat(  "ds_gen_boost"   ,std::nan(""));
+  
+          gen.addUserFloat("bs_gen_px"      ,std::nan(""));
+          gen.addUserFloat("bs_gen_py"      ,std::nan(""));
+          gen.addUserFloat("bs_gen_pz"      ,std::nan(""));
+          gen.addUserFloat("bs_gen_pt"      ,std::nan(""));
+          gen.addUserFloat("bs_gen_eta"     ,std::nan(""));
+          gen.addUserFloat("bs_gen_phi"     ,std::nan(""));
+  
+          gen.addUserFloat("pv_x_gen"       ,std::nan(""));
+          gen.addUserFloat("pv_y_gen"       ,std::nan(""));
+          gen.addUserFloat("pv_z_gen"       ,std::nan(""));
+          gen.addUserFloat("scnd_pv_x_gen"  ,std::nan("")); //This is the bs production vertex!
+          gen.addUserFloat("scnd_pv_y_gen"  ,std::nan(""));
+          gen.addUserFloat("scnd_pv_z_gen"  ,std::nan(""));
+          gen.addUserInt("scnd_pv_idx_gen"  ,-9999);
+  
+  
+          gen.addUserFloat("bs_gen_charge"  ,std::nan(""));
+          gen.addUserInt(  "bs_gen_pdgid"   ,-9999);
+          gen.addUserFloat("b_boost_gen" ,std::nan(""));
+          gen.addUserFloat("b_boost_gen_pt" ,std::nan(""));
+          gen.addUserFloat("b_boost_gen_eta" ,std::nan(""));
+          gen.addUserFloat("b_boost_gen_phi" ,std::nan(""));
+  
+          gen.addUserInt("disc_is_negative_gen", -9999); 
+          gen.addUserFloat("disc_negativity_gen", std::nan("")); 
+  
+          gen.addUserFloat("bs_gen_lhcb_pt", std::nan(""));
+          gen.addUserFloat("bs_gen_lhcb_eta", std::nan(""));
+          gen.addUserFloat("bs_gen_lhcb_phi", std::nan(""));
+  
+          gen.addUserFloat("fv_x_gen"       ,std::nan(""));
+          gen.addUserFloat("fv_y_gen"       ,std::nan(""));
+          gen.addUserFloat("fv_z_gen"       ,std::nan(""));
+  
+          gen.addUserFloat("angMuWGen"      ,std::nan(""));
+          gen.addUserFloat("cosMuWGen"      ,std::nan(""));
+          gen.addUserFloat("cosMuWGenLhcb"      ,std::nan(""));
+          gen.addUserFloat("cosMuWGenReco1"      ,std::nan(""));
+          gen.addUserFloat("cosMuWGenReco2"      ,std::nan(""));
+  
+          gen.addUserFloat("angPiK1Gen"     ,std::nan(""));
+          gen.addUserFloat("angPiK2Gen"     ,std::nan(""));
+          gen.addUserFloat("cosPiK1Gen"     ,std::nan(""));
+          gen.addUserFloat("cosPiK2Gen"     ,std::nan(""));
+  
+          gen.addUserFloat("angPhiDsGen"    ,std::nan(""));
+          gen.addUserFloat("angPiDsGen"     ,std::nan(""));
+          gen.addUserFloat("cosPhiDsGen"    ,std::nan(""));
+          gen.addUserFloat("cosPiDsGen"     ,std::nan(""));
+          gen.addUserFloat("cosPiDsGenLhcb"     ,std::nan(""));
+  
+          gen.addUserFloat("angPlaneBsGen"  ,std::nan(""));
+          gen.addUserFloat("cosPlaneBsGen"  ,std::nan(""));
+          gen.addUserFloat("angPlaneDsGen"  ,std::nan(""));
+          gen.addUserFloat("cosPlaneDsGen"  ,std::nan(""));
+  
+          //gen.addUserFloat("mu_iso_03_gen"     ,std::nan(""));
+          //gen.addUserFloat("mu_iso_04_gen"     ,std::nan(""));
+          //gen.addUserFloat("mu_rel_iso_03_gen" ,std::nan(""));
+          //gen.addUserFloat("mu_rel_iso_04_gen" ,std::nan(""));
+  
+  
+        }
+  
+        /////////////////////// END OF VARIABLE DEFINITION //////////////////////
+  
+        //append candidate at the end of our return value :)
+        //ret_value can be a vector!!
+        ret_value->emplace_back(gen);
+        //ret_value_gen->emplace_back(gen);
 
 iEvent.put(std::move(ret_value), "gen");
 }//closing event loop
