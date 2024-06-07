@@ -192,8 +192,6 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
   // per event!                                       //
   //////////////////////////////////////////////////////
 
-  pat::CompositeCandidate genSIM; 
-
   int sigId = -9999;
   int bId = 0;
   int genMatchSuccess = 0;
@@ -237,7 +235,7 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
       // find gen matched k2                        //
       ////////////////////////////////////////////////
    
-      for(size_t k2IdxGen = 0; k2IdxGen < pureGen->size(); ++k2IdxGen){
+      for(size_t k2IdxGen = k1IdxGen + 1; k2IdxGen < pureGen->size(); ++k2IdxGen){
    
            //avoid picking the same gen particle as for k1
            if(k2IdxGen == k1IdxGen) continue; 
@@ -281,6 +279,8 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
              //////////////////////////////////////////////////
              // Find resonances at gen level                 //
              //////////////////////////////////////////////////
+             pat::CompositeCandidate genSIM; 
+
              nKKPiMuGENSIM++;     
              //Should we pick the best gen match (in terms of dR) only? -> No, like this is better 
 
@@ -345,7 +345,6 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
              nGenMatches++;
              genMatchSuccess = 1;
              nGenMatchedGENSIM++;
-             genSIM.addUserInt("gen_match_success",genMatchSuccess);
              
              //if(nGenMatches > 1) continue; //std::cout <<"there is more than one match!!" << std::endl;
 
@@ -781,9 +780,9 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
 
              */
 
-             //printDaughters(bsFromMu); //-> for debugging
-             //std::cout << "mom:" << bMotherId << std::endl; //for debugging
-             //std::cout << "ID is:" << sigId     << std::endl;  //for debugging;
+             printDaughters(bsFromMu); //-> for debugging
+             std::cout << "mom:" << bMotherId << std::endl; //for debugging
+             std::cout << "ID is:" << sigId     << std::endl;  //for debugging;
 
              //define helicity angles
 
@@ -853,9 +852,20 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
              genSIM.addUserFloat("cosPlaneDsGen", cos(angPlaneDsGen));
 
              //if we reached this point we have found our gen match and we can stop the loop
+             // since now we are not trying to find only 1 gen match for a reco-candidate
+             // (we dont loop over the bs candidates) but rather over the events, we have to allow
+             // several caniddates per event!! As we also allow several bs candidates per event!
 
-             //break;
-             goto end;
+             genSIM.addUserInt("sig",sigId);
+             genSIM.addUserInt("b_mother_id",bId);
+             genSIM.addUserInt("gen_match_success",genMatchSuccess);
+
+             ret_value->emplace_back(genSIM);
+             std::cout << "i have size nr:" << ret_value->size() << std::endl;
+             std::cout << "pion pt:" << piPtrGen->pt() << std::endl;
+             std::cout << "k1 pt:" << k1PtrGen->pt() << std::endl;
+             std::cout << "k2 pt:" << k2PtrGen->pt() << std::endl;
+             std::cout << "mu pt:" << muPtrGen->pt() << std::endl;
              //////////////////////////////////////////////////
 
            }//close gen matching pi loop 
@@ -863,175 +873,13 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
           }//close gen matching k2 loop 
         //break;
         } //close gen matching k1 loop
-      std::cout << "found kaons:" << kaons << std::endl;
+      //std::cout << "found kaons:" << kaons << std::endl;
       //break;
       } //close gen matching mu loop
 
       //if (genMatchSuccess == 0) continue; 
 
-      end:
-        genSIM.addUserInt("sig",sigId);
-        genSIM.addUserInt("b_mother_id",bId);
-        genSIM.addUserInt("gen_match_success",genMatchSuccess);
-  
-        if (genMatchSuccess == 0){
-          // no gen match, we store nans
-  
-          //prepare a dummy (This does not work!! can not add the empty vector as candidate even it compiles.. why??)
-          //reco::GenParticle dummy;
-          //math::PtEtaPhiMLorentzVector dummyP4(std::nan(""),std::nan("") ,std::nan("") ,std::nan(""));
-          //dummy.setP4(dummyP4); 
-          //dummy.setCharge(-9999); 
-          //dummy.setPdgId( -9999); 
-          //edm::Ptr<reco::GenParticle> empty(&dummy, 0);
-  
-          //gen.addUserCand("mu_gen"          ,empty);
-          //gen.addUserCand("k1_gen"          ,empty);
-          //gen.addUserCand("k2_gen"          ,empty);
-          //gen.addUserCand("pi_gen"          ,empty);
-  
-          //well, then its a little more tedious
-          genSIM.addUserFloat("m2_miss_gen"    ,std::nan(""));
-          genSIM.addUserFloat("pt_miss_gen"    ,std::nan(""));
-          genSIM.addUserFloat("q2_gen"         ,std::nan(""));
-          genSIM.addUserFloat("e_star_gen"     ,std::nan(""));
-          genSIM.addUserFloat("e_gamma_gen"    ,std::nan(""));
-  
-          genSIM.addUserFloat("mu_gen_px"      ,std::nan(""));
-          genSIM.addUserFloat("mu_gen_py"      ,std::nan(""));
-          genSIM.addUserFloat("mu_gen_pz"      ,std::nan(""));
-          genSIM.addUserFloat("mu_gen_pt"      ,std::nan(""));
-          genSIM.addUserFloat("mu_gen_eta"     ,std::nan(""));
-          genSIM.addUserFloat("mu_gen_phi"     ,std::nan(""));
-          genSIM.addUserFloat("mu_gen_m"    ,std::nan(""));
-          genSIM.addUserFloat("mu_gen_charge"  ,std::nan(""));
-          genSIM.addUserInt(  "mu_gen_pdgid"   ,-9999);
-  
-          genSIM.addUserFloat("k1_gen_px"      ,std::nan(""));
-          genSIM.addUserFloat("k1_gen_py"      ,std::nan(""));
-          genSIM.addUserFloat("k1_gen_pz"      ,std::nan(""));
-          genSIM.addUserFloat("k1_gen_pt"      ,std::nan(""));
-          genSIM.addUserFloat("k1_gen_eta"     ,std::nan(""));
-          genSIM.addUserFloat("k1_gen_phi"     ,std::nan(""));
-          genSIM.addUserFloat("k1_gen_m"    ,std::nan(""));
-          genSIM.addUserFloat("k1_gen_charge"  ,std::nan(""));
-          genSIM.addUserInt(  "k1_gen_pdgid"   ,-9999);
-  
-          genSIM.addUserFloat("k2_gen_px"      ,std::nan(""));
-          genSIM.addUserFloat("k2_gen_py"      ,std::nan(""));
-          genSIM.addUserFloat("k2_gen_pz"      ,std::nan(""));
-          genSIM.addUserFloat("k2_gen_pt"      ,std::nan(""));
-          genSIM.addUserFloat("k2_gen_eta"     ,std::nan(""));
-          genSIM.addUserFloat("k2_gen_phi"     ,std::nan(""));
-          genSIM.addUserFloat("k2_gen_m"    ,std::nan(""));
-          genSIM.addUserFloat("k2_gen_charge"  ,std::nan(""));
-          genSIM.addUserInt(  "k2_gen_pdgid"   ,-9999);
-  
-          genSIM.addUserFloat("pi_gen_px"      ,std::nan(""));
-          genSIM.addUserFloat("pi_gen_py"      ,std::nan(""));
-          genSIM.addUserFloat("pi_gen_pz"      ,std::nan(""));
-          genSIM.addUserFloat("pi_gen_pt"      ,std::nan(""));
-          genSIM.addUserFloat("pi_gen_eta"     ,std::nan(""));
-          genSIM.addUserFloat("pi_gen_phi"     ,std::nan(""));
-          genSIM.addUserFloat("pi_gen_m"    ,std::nan(""));
-          genSIM.addUserFloat("pi_gen_charge"  ,std::nan(""));
-          genSIM.addUserInt(  "pi_gen_pdgid"   ,-9999);
-  
-          genSIM.addUserFloat("phi_gen_px"     ,std::nan(""));
-          genSIM.addUserFloat("phi_gen_py"     ,std::nan(""));
-          genSIM.addUserFloat("phi_gen_pz"     ,std::nan(""));
-          genSIM.addUserFloat("phi_gen_pt"     ,std::nan(""));
-          genSIM.addUserFloat("phi_gen_eta"    ,std::nan(""));
-          genSIM.addUserFloat("phi_gen_phi"    ,std::nan(""));
-          genSIM.addUserFloat("tv_x_gen"       ,std::nan(""));
-          genSIM.addUserFloat("tv_y_gen"       ,std::nan(""));
-          genSIM.addUserFloat("tv_z_gen"       ,std::nan(""));
-          genSIM.addUserFloat("phi_gen_charge" ,std::nan(""));
-          genSIM.addUserInt(  "phi_gen_pdgid"  ,-9999);
-  
-          genSIM.addUserFloat("ds_gen_px"      ,std::nan(""));
-          genSIM.addUserFloat("ds_gen_py"      ,std::nan(""));
-          genSIM.addUserFloat("ds_gen_pz"      ,std::nan(""));
-          genSIM.addUserFloat("ds_gen_pt"      ,std::nan(""));
-          genSIM.addUserFloat("ds_gen_eta"     ,std::nan(""));
-          genSIM.addUserFloat("ds_gen_phi"     ,std::nan(""));
-          genSIM.addUserFloat("sv_x_gen"       ,std::nan(""));
-          genSIM.addUserFloat("sv_y_gen"       ,std::nan(""));
-          genSIM.addUserFloat("sv_z_gen"       ,std::nan(""));
-          genSIM.addUserFloat("ds_gen_charge"  ,std::nan(""));
-          genSIM.addUserInt(  "ds_gen_pdgid"   ,-9999);
-          genSIM.addUserFloat(  "ds_gen_boost"   ,std::nan(""));
-  
-          genSIM.addUserFloat("bs_gen_px"      ,std::nan(""));
-          genSIM.addUserFloat("bs_gen_py"      ,std::nan(""));
-          genSIM.addUserFloat("bs_gen_pz"      ,std::nan(""));
-          genSIM.addUserFloat("bs_gen_pt"      ,std::nan(""));
-          genSIM.addUserFloat("bs_gen_eta"     ,std::nan(""));
-          genSIM.addUserFloat("bs_gen_phi"     ,std::nan(""));
-  
-          genSIM.addUserFloat("pv_x_gen"       ,std::nan(""));
-          genSIM.addUserFloat("pv_y_gen"       ,std::nan(""));
-          genSIM.addUserFloat("pv_z_gen"       ,std::nan(""));
-          genSIM.addUserFloat("scnd_pv_x_gen"  ,std::nan("")); //This is the bs production vertex!
-          genSIM.addUserFloat("scnd_pv_y_gen"  ,std::nan(""));
-          genSIM.addUserFloat("scnd_pv_z_gen"  ,std::nan(""));
-          genSIM.addUserInt("scnd_pv_idx_gen"  ,-9999);
-  
-  
-          genSIM.addUserFloat("bs_gen_charge"  ,std::nan(""));
-          genSIM.addUserInt(  "bs_gen_pdgid"   ,-9999);
-          genSIM.addUserFloat("b_boost_gen" ,std::nan(""));
-          genSIM.addUserFloat("b_boost_gen_pt" ,std::nan(""));
-          genSIM.addUserFloat("b_boost_gen_eta" ,std::nan(""));
-          genSIM.addUserFloat("b_boost_gen_phi" ,std::nan(""));
-  
-          genSIM.addUserInt("disc_is_negative_gen", -9999); 
-          genSIM.addUserFloat("disc_negativity_gen", std::nan("")); 
-  
-          genSIM.addUserFloat("bs_gen_lhcb_pt", std::nan(""));
-          genSIM.addUserFloat("bs_gen_lhcb_eta", std::nan(""));
-          genSIM.addUserFloat("bs_gen_lhcb_phi", std::nan(""));
-  
-          genSIM.addUserFloat("fv_x_gen"       ,std::nan(""));
-          genSIM.addUserFloat("fv_y_gen"       ,std::nan(""));
-          genSIM.addUserFloat("fv_z_gen"       ,std::nan(""));
-  
-          genSIM.addUserFloat("angMuWGen"      ,std::nan(""));
-          genSIM.addUserFloat("cosMuWGen"      ,std::nan(""));
-          genSIM.addUserFloat("cosMuWGenLhcb"      ,std::nan(""));
-          genSIM.addUserFloat("cosMuWGenReco1"      ,std::nan(""));
-          genSIM.addUserFloat("cosMuWGenReco2"      ,std::nan(""));
-  
-          genSIM.addUserFloat("angPiK1Gen"     ,std::nan(""));
-          genSIM.addUserFloat("angPiK2Gen"     ,std::nan(""));
-          genSIM.addUserFloat("cosPiK1Gen"     ,std::nan(""));
-          genSIM.addUserFloat("cosPiK2Gen"     ,std::nan(""));
-  
-          genSIM.addUserFloat("angPhiDsGen"    ,std::nan(""));
-          genSIM.addUserFloat("angPiDsGen"     ,std::nan(""));
-          genSIM.addUserFloat("cosPhiDsGen"    ,std::nan(""));
-          genSIM.addUserFloat("cosPiDsGen"     ,std::nan(""));
-          genSIM.addUserFloat("cosPiDsGenLhcb"     ,std::nan(""));
-  
-          genSIM.addUserFloat("angPlaneBsGen"  ,std::nan(""));
-          genSIM.addUserFloat("cosPlaneBsGen"  ,std::nan(""));
-          genSIM.addUserFloat("angPlaneDsGen"  ,std::nan(""));
-          genSIM.addUserFloat("cosPlaneDsGen"  ,std::nan(""));
-  
-          //gen.addUserFloat("mu_iso_03_gen"     ,std::nan(""));
-          //gen.addUserFloat("mu_iso_04_gen"     ,std::nan(""));
-          //gen.addUserFloat("mu_rel_iso_03_gen" ,std::nan(""));
-          //gen.addUserFloat("mu_rel_iso_04_gen" ,std::nan(""));
-  
-  
-        }
-  
-        /////////////////////// END OF VARIABLE DEFINITION //////////////////////
-  
-        //append candidate at the end of our return value :)
-        //ret_value can be a vector!!
-        ret_value->emplace_back(genSIM);
-        //ret_value_gen->emplace_back(gen);
+     /////////////////////// END OF VARIABLE DEFINITION //////////////////////
 
 iEvent.put(std::move(ret_value), "genSIM");
 }//closing event loop
