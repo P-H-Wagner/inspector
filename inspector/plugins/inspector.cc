@@ -811,9 +811,9 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
 
              */
 
-             //printDaughters(bsFromMu); //-> for debugging
-             //std::cout << "mom:" << bMotherId << std::endl; //for debugging
-             //std::cout << "ID is:" << sigId     << std::endl;  //for debugging;
+             printDaughters(bsFromMu); //-> for debugging
+             std::cout << "mom:" << bMotherId << std::endl; //for debugging
+             std::cout << "ID is:" << sigId     << std::endl;  //for debugging;
 
              //define helicity angles
 
