@@ -7,13 +7,10 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('channel') # sig or hb or data
 parser.add_argument('nFiles')  # nr of miniAOD files to process
+parser.add_argument('inspector')  # which inspector to run (reco, gensim, hammer) 
 args = parser.parse_args()
 
-
 ######################################
-
-# Is this an efficiency calulation? -> If so, take toy samples
-GENSIM = True
 
 #500 jobs per user on std queue
 nMaxJobs = 800
@@ -24,10 +21,10 @@ filesPerJob = 2
 if (int(args.nFiles) < nMaxJobs) and (int(args.nFiles) != -1):
   filesPerJob = 1 #below 500 jobs we can take 1 file per job and thus short
   queue = 'short' 
-  time  = 10
+  time  = 60
 else:
   queue = 'short'
-  time = 20
+  time =30
 print("========> processing ", filesPerJob, " files per job")
 
 ######################################
@@ -55,24 +52,42 @@ def filesFromTxt(txtFile):
 # Input source
 
 if args.channel == 'sig':
-  #directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/all_signals_HbToDsPhiKKPiMuNu_MT_MINI_21jan23_v1/' #old signal from MA thesis
-  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/signals/all_signals_request_21_11_23.txt' # new signals!!
-  #inputfiles = filesFromFolder(directory)
-  inputfiles = filesFromTxt(directory)
-  naming = 'all_signals'
+
+  if args.inspector == 'hammer':
+
+    directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/sig_fragment_19_07_2024_12_53_00/"
+    inputfiles = filesFromTxt(directory)
+    naming = 'signals_hammer'
+
+  else:
+
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/all_signals_HbToDsPhiKKPiMuNu_MT_MINI_21jan23_v1/' #old signal from MA thesis
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/signals/all_signals_request_21_11_23.txt' # new signals!!
+    #inputfiles = filesFromFolder(directory)
+    inputfiles = filesFromTxt(directory)
+    naming = 'all_signals'
 
 if args.channel == 'hb':
-  directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/inclusive_HbToDsPhiKKPiMuNu_MINI_25mar21_v1/' #hb 
-  inputfiles = filesFromFolder(directory)
+
+  if args.inspector == "gensim":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_06_45/'
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_56_33/' #higher stats
+    inputfiles = filesFromFolder(directory)
+
+
+  if args.inspector == "reco":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/inclusive_HbToDsPhiKKPiMuNu_MINI_25mar21_v1/' #hb 
+    inputfiles = filesFromFolder(directory)
   naming = 'hb_inclusive'
 
 if args.channel == 'b0':
 
-  if GENSIM == True: # filter efficiency calculation
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_03_06_2024_22_52_56' 
+  if args.inspector == "gensim":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_03_06_2024_22_52_56/' 
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_06_06_2024_20_38_57/'  # new filter 
     inputfiles = filesFromFolder(directory)
 
-  else:
+  if args.inspector == "reco":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/b0/b0.txt' #b0 
     inputfiles = filesFromTxt(directory)
 
@@ -80,34 +95,35 @@ if args.channel == 'b0':
 
 if args.channel == 'bplus':
 
-  if GENSIM == True: # filter efficiency calculation
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_03_06_2024_19_15_19' 
+  if args.inspector == "gensim":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_03_06_2024_19_15_19/' 
     inputfiles = filesFromFolder(directory)
 
-  else:
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bplus/bplus.txt' #b0 
+  if args.inspector == "reco":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bplus/bplus.txt' #bplus 
     inputfiles = filesFromTxt(directory)
   naming = 'bplus'
 
 if args.channel == 'bs':
 
-  if GENSIM == True: # filter efficiency calculation
-    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47'  # old filter
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_09_52_40'  # new filter
+  if args.inspector == "gensim":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/'  # old filter
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_09_52_40'  # new filter
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_20_38_57'  # new filter
     inputfiles = filesFromFolder(directory)
-  else:
+  if args.inspector == "reco":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bs/bs.txt' #bs 
     inputfiles = filesFromTxt(directory)
   naming = 'bs'
 
 if args.channel == 'lambdab':
 
-  if GENSIM == True: # filter efficiency calculation
+  if args.inspector == "gensim":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/lambdab_fragment_04_06_2024_09_40_54' 
     inputfiles = filesFromFolder(directory)
 
-  else:
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/lambdab/lambdab.txt' #bs 
+  if args.inspector == "reco":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/lambdab/lambdab.txt' #lambdab 
     inputfiles = filesFromTxt(directory)
   naming = 'lambdab'
 
@@ -178,7 +194,7 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
      ])
 
   print(command_sh_batch)
-  #os.system(command_sh_batch)
+  os.system(command_sh_batch)
 
 
 

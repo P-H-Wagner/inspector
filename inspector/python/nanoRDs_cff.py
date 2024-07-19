@@ -9,6 +9,7 @@ from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
 # gen matching 
 from rds.inspector.inspector_cff import *
 from rds.inspector.inspectorGENSIM_cff import *
+from rds.inspector.inspectorHAMMER_cff import *
 
 #G: nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)  #purpose?
 
@@ -20,4 +21,8 @@ def nanoAOD_customizeGenMatching(process):
     return process
 def nanoAOD_customizeGENSIMMatching(process):
     process.nanoGENSIMMatchingSequence = cms.Sequence( process.nanoSequence + inspectorGENSIMSequence)
+    return process
+
+def nanoAOD_customizeHAMMERMatching(process):
+    process.nanoHAMMERMatchingSequence = cms.Sequence( process.nanoSequence + inspectorHAMMERSequence)
     return process

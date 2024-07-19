@@ -2,9 +2,8 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 import FWCore.ParameterSet.Config as cms
 
 # TODO: put different samples into parser (flag from command line)
-# channel = 'sig'
-channel = 'bs'
-GENSIM = True
+channel = 'sig'
+insp    = 'hammer' # reco hammer gensim
 
 import os
 
@@ -38,7 +37,7 @@ process.Timing = cms.Service("Timing",
 #load all the chosen options
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(5)
 )
 
 def filesFromFolder(directory):
@@ -53,10 +52,18 @@ def filesFromTxt(txtFile):
 # Input source
 
 if channel == 'sig':
-  #directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/all_signals_HbToDsPhiKKPiMuNu_MT_MINI_21jan23_v1/' #old signals MA Thesis
-  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/signals/all_signals_request_21_11_23.txt' # new signals!!
-  #inputfiles = filesFromFolder(directory)
-  inputfiles = filesFromTxt(directory)
+
+  if insp == 'hammer':
+
+    directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/sig_fragment_19_07_2024_12_53_00/"
+    inputfiles = filesFromFolder(directory)
+    naming = 'signals_hammer'
+
+  if insp == 'reco':
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/all_signals_HbToDsPhiKKPiMuNu_MT_MINI_21jan23_v1/' #old signals MA Thesis
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/signals/all_signals_request_21_11_23.txt' # new signals!!
+    #inputfiles = filesFromFolder(directory)
+    inputfiles = filesFromTxt(directory)
 
 if channel == 'hb':
   directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/inclusive_HbToDsPhiKKPiMuNu_MINI_25mar21_v1/' #hb 
@@ -64,10 +71,12 @@ if channel == 'hb':
 
 if channel == 'bplus':
 
-  if GENSIM == True:
+  if insp == 'gensim':
     directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_03_06_2024_19_15_19/" # old filter
+    directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_11_06_2024_09_03_41/" # old filter includes all decays for crosscheck
     inputfiles = filesFromFolder(directory)
-  else:
+    
+  if insp == 'reco':
     txtFile = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bplus/bplus.txt' #data
     inputfiles = filesFromTxt(txtFile)[0:1]
 
@@ -79,16 +88,31 @@ if channel == 'lambdab':
 
 if channel == 'bs':
 
-  if GENSIM == True: 
+  if insp == 'gensim':
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/'  # old filter
     #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_09_52_40/'  # new filter
-    inputfiles = filesFromFolder(directory)
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_10_06_2024_17_46_51/'#
+    inputfiles = filesFromFolder(directory)[0:10]
     naming = 'bs'
 
-  else:
+  if insp == 'reco':
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bs/bs.txt' #bs 
     inputfiles = filesFromTxt(directory)
     naming = 'bs'
+
+if channel == 'b0':
+
+  if insp == 'gensim':
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_06_06_2024_20_38_57/'  # new filter
+    inputfiles = filesFromFolder(directory)[0:20]
+    naming = 'b0'
+
+  if insp == 'reco':
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bs/bs.txt' #bs 
+    inputfiles = filesFromTxt(directory)
+    naming = 'b0'
+
+
 
 
 if channel == 'data':
@@ -103,8 +127,11 @@ process.source = cms.Source(
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/50002/D0AE1369-0D7B-554C-BBB9-7B324AACCABD.root'), #data file to compare with riccs MA code
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/50002/36CD4F31-A249-DF49-A3FF-32DCA7223D09.root'), #10
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/40000/56D888ED-EB2C-B24F-A5A0-8D162DAFFA25.root'), #7
-    #fileNames = cms.untracked.vstring(inputfiles),# all_signals_HbToDsPhiKKPiMuNu_MT_0.root'), #automized case
-    fileNames = cms.untracked.vstring("file:/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/bs_fragment_chunk3_03_06_2024_19_15_47.root"),
+    fileNames = cms.untracked.vstring(inputfiles),# all_signals_HbToDsPhiKKPiMuNu_MT_0.root'), #automized case
+    #fileNames = cms.untracked.vstring("file:/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/bs_fragment_chunk3_03_06_2024_19_15_47.root"),
+    #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch////store/mc/RunIISummer20UL18MiniAODv2/BsToDoubleCharm_DsFilter_PhiFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/Custom_RDStarPU_BParking_106X_upgrade2018_realistic_v16_L1v1-v1/2820000/CEF9599E-F695-554B-97D2-276663715216.root'),
+    #fileNames = cms.untracked.vstring("file:/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_10_06_2024_17_46_51/bs_fragment_chunk9_10_06_2024_17_46_51.root"),
+
     secondaryFileNames = cms.untracked.vstring(),
     #skipEvents=cms.untracked.uint32(0) # skip first n events   
 )
@@ -153,13 +180,21 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 from rds.inspector.nanoRDs_cff import *
 
 #can only gen match on mc
-if GENSIM:
+if insp =="gensim":
   process = nanoAOD_customizeGENSIMMatching(process) 
   process.nanoAOD_Bs_step= cms.Path(process.nanoGENSIMMatchingSequence)
-else:
+if insp =="reco":
   process = nanoAOD_customizeGenMatching(process) 
   # Path and EndPath definitions
   process.nanoAOD_Bs_step= cms.Path(process.nanoGenMatchingSequence)
+if insp =="hammer":
+  process = nanoAOD_customizeHAMMERMatching(process) 
+  # Path and EndPath definitions
+  process.nanoAOD_Bs_step= cms.Path(process.nanoHAMMERMatchingSequence)
+
+
+
+
 
 
 #process.nanoAOD_Bs_step= cms.Path(process.triggerSequence) ## to run only Trigger.cc for debugging
