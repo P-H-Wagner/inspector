@@ -258,7 +258,7 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
       // find gen matched k2                        //
       ////////////////////////////////////////////////
    
-      for(size_t k2IdxGen = k1IdxGen + 1; k2IdxGen < prunedGen->size(); ++k2IdxGen){
+      for(size_t k2IdxGen = k1IdxGen +1 ; k2IdxGen < prunedGen->size(); ++k2IdxGen){
    
            //avoid picking the same gen particle as for k1
            if(k2IdxGen == k1IdxGen) continue; 
@@ -812,9 +812,19 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
 
              */
 
+             int n_direct = printDirectDaughters(bsFromMu, true); //-> for debugging
+
+             //if (sigId == 339) { 
+ 
+             //int dummy = printDirectDaughters(bsFromMu, true);
              printDaughters(bsFromMu); //-> for debugging
+
              std::cout << "mom:" << bMotherId << std::endl; //for debugging
              std::cout << "ID is:" << sigId     << std::endl;  //for debugging;
+
+
+             //}
+
 
              //define helicity angles
 
