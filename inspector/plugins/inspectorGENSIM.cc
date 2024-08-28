@@ -302,6 +302,7 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
              if( (dsFromPhi != dsFromPi) || (dsFromPhi == nullptr) || (dsFromPi == nullptr)) continue; 
              nFoundDsGENSIM++;               
 
+             //std::cout<< "found ds candiadte!" << std::endl;
              //std::cout << "k pts are: " << k1PtrGen->pt() << " " << k2PtrGen->pt() << std::endl;
              //printMothers(dsFromPhi);
 
@@ -324,15 +325,22 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
                }
              }
               
+             //std::cout<< "mom idx is: " << bMotherId << std::endl;
              if (bMotherId == 0) continue; // no b mother found
+
+             std::cout<< "WE HAVE A B MOM" << bMotherId << std::endl;
              // Even if the mu is not required to come brom the b mother directly (would be signal case)
              // if it comes from another D meson (double charm background case), we still want
              // that this D meson is coming from the b mother. So the muon should share
              // the same ancestor as the Ds.
              auto bsFromDs = getAncestor(dsFromPhi,bMotherId);
+             std::cout << "bs from ds has chain: " << std::endl;
+             printDaughters(bsFromDs);
              auto bsFromMu = getAncestor(muReco,   bMotherId);
+             //std::cout << "bs from mu has chain: " << std::endl;
+             //printDaughters(bsFromMu);
 
-             if( (bsFromDs != bsFromMu) || (bsFromDs == nullptr) || (bsFromMu == nullptr)) continue; 
+             if( (bsFromDs != bsFromMu) || (bsFromDs == nullptr) || (bsFromMu == nullptr)) {std::cout << "b pointer is null" << std::endl; continue;} 
  
              nFoundBGENSIM++;
              
@@ -682,23 +690,26 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
                case 433:   sigId += 10; break; // Ds+*
                case 10431: sigId += 20; break; // Ds+(2317)*
                case 20433: sigId += 30; break; // Ds+(2457)*
-               default:    sigId += 40; break; // anything else
+               default:    sigId = 500; break; // anything else
              }
+
+             int checkSignal = -1;
+             int checkKNuMu  = -1;
+
+             if (abs(bMotherId) == 531) checkSignal = isSignal(bsFromMu); 
+             if (abs(bMotherId) == 521) checkKNuMu  = isKNuMu(bsFromMu); 
 
              // Signal candidates enter here
-             if ((dID == 0) && ((dsID == 431) ||(dsID == 433))&& (abs(bMotherId) == 531)) {
-               //std::cout << "i enter the signal tag!" << std::endl;
-               sigId -= 300; // signal should live in 0
-               if (isTau) sigId += 1; 
-             }
+             if (checkSignal != -1)    sigId = checkSignal;
+             else if(checkKNuMu != -1) sigId = checkKNuMu;
 
              // special case of B+ -> K nu mu / B+ -> K tau nu 
-             else if((dID == 0) && (dsID == 0) && (abs(bMotherId) == 521)){
-             
-               if (!isTau) sigId += 7;
-               if (isTau)  sigId  += 8;
-
-             }
+             //else if((dID == 0) && (dsID == 0) && (abs(bMotherId) == 521)){
+             // 
+             //  if (!isTau) sigId += 7;
+             //  if (isTau)  sigId  += 8;
+             //
+             //}
 
              else {
                switch(dID){
@@ -708,11 +719,24 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
                  case 413:   sigId += 3; break;  // D+*
                  case 423:   sigId += 4; break;  // D0*
                  case 433:   sigId += 5; break;  // Ds+*
-                 case 4122:   sigId += 6; break;  // Lambda c
+                 case 4122:  sigId += 6; break;  // Lambda c
 
-                 default:    sigId += 9; break; // anything else
+                 default:    sigId = 500; break; // anything else
                }
              }
+
+             // we want to be sure that we dont tag a Hb channel which was not simulated!
+             // since the other b meson can decay freely, this can happen! F.e. we can have stuff like
+             // Bs -> Double charm + additional pions/kaons/gammas
+             std::set<int> bs_channels = {302, 300, 303, 312, 305, 315, 0, 1, 10 ,11}; 
+             std::set<int> b0_channels = {200, 203, 210, 213, 212, 205, 215, 220, 223, 230, 233}; 
+             std::set<int> bplus_channels = { 107, 108, 101, 104, 117, 118, 121, 124, 131, 134, 111, 114}; 
+             std::set<int> lambdab_channels = {406, 416}; 
+
+             if ((abs(bMotherId) == 531) && (bs_channels.find(sigId)         == bs_channels.end() )) sigId = 500;
+             else if ((abs(bMotherId) == 521) && (bplus_channels.find(sigId) == bplus_channels.end() )) sigId = 500;
+             else if ((abs(bMotherId) == 511) && (b0_channels.find(sigId)    == b0_channels.end() )) sigId = 500;
+             else if ((abs(bMotherId) == 5122) && (lambdab_channels.find(sigId) == lambdab_channels.end() )) sigId = 500;
 
              /*
              bool isDsStar    = false;
@@ -780,6 +804,7 @@ void inspectorGENSIM::produce(edm::StreamID, edm::Event &iEvent, const edm::Even
 
              */
 
+             int dummy = printDirectDaughters(bsFromMu, true); //-> for debugging
              printDaughters(bsFromMu); //-> for debugging
              std::cout << "mom:" << bMotherId << std::endl; //for debugging
              std::cout << "ID is:" << sigId     << std::endl;  //for debugging;

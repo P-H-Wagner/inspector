@@ -40,8 +40,61 @@ typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 constexpr float K_MASS = 0.493677;
 constexpr float PI_MASS = 0.139571;
 
+///////////////////////////////////////////////////////////////////////////////////
+// checks if B+ -> Ds K Nu Mu
 
+inline int isKNuMu(const auto mom){
 
+  int foundSignal = -1;
+
+  std::set<int> k_dsmu         = {321, 431, 13, 14};
+  std::set<int> k_dsstarmu     = {321, 433, 13, 14};
+  std::set<int> k_dstau        = {321, 431, 15, 16};
+  std::set<int> k_dsstartau    = {321, 433, 15, 16};
+
+  std::set<int> dau_list;
+ 
+  int nDaus = mom->numberOfDaughters();
+
+  for(size_t dauIdx = 0; dauIdx < mom->numberOfDaughters(); ++dauIdx){
+    dau_list.insert( abs(mom->daughter(dauIdx)->pdgId()) );
+  }
+
+  if      ((dau_list == k_dsmu)      && (nDaus == 4)) foundSignal = 107;
+  else if ((dau_list == k_dsstarmu)  && (nDaus == 4)) foundSignal = 117;
+  else if ((dau_list == k_dstau)     && (nDaus == 4)) foundSignal = 108;
+  else if ((dau_list == k_dsstartau) && (nDaus == 4)) foundSignal = 118;
+
+  return foundSignal;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// checks if signal 
+
+inline int isSignal(const auto mom){
+
+  int foundSignal = -1;
+
+  std::set<int> signal_dsmu         = {431, 13, 14};
+  std::set<int> signal_dsstarmu     = {433, 13, 14};
+  std::set<int> signal_dstau        = {431, 15, 16};
+  std::set<int> signal_dsstartau    = {433, 15, 16};
+
+  std::set<int> dau_list;
+ 
+  int nDaus = mom->numberOfDaughters();
+
+  for(size_t dauIdx = 0; dauIdx < mom->numberOfDaughters(); ++dauIdx){
+    dau_list.insert( abs(mom->daughter(dauIdx)->pdgId()) );
+  }
+
+  if      ((dau_list == signal_dsmu)      && (nDaus == 3)) foundSignal = 0;
+  else if ((dau_list == signal_dsstarmu)  && (nDaus == 3)) foundSignal = 10;
+  else if ((dau_list == signal_dstau)     && (nDaus == 3)) foundSignal = 1;
+  else if ((dau_list == signal_dsstartau) && (nDaus == 3)) foundSignal = 11;
+
+  return foundSignal;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 // function which prints all daughters 
@@ -54,6 +107,20 @@ inline void printDaughters(const auto mom){
     printDaughters(mom->daughter(dauIdx)); 
   }
   return;
+}
+///////////////////////////////////////////////////////////////////////////////////
+// function which prints only direct daughters 
+
+inline int printDirectDaughters(const auto mom, bool print){
+
+  for(size_t dauIdx = 0; dauIdx < mom->numberOfDaughters(); ++dauIdx){
+    if (print){
+    std::cout << "Mom is: "<< mom->pdgId() << std::endl;
+    std::cout << "and has direct daughter: " << mom->daughter(dauIdx)->pdgId() << std::endl;
+    }
+
+  }
+  return mom->numberOfDaughters();
 }
 ///////////////////////////////////////////////////////////////////////////////////
 // function which prints all moms 
