@@ -40,6 +40,30 @@ typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 constexpr float K_MASS = 0.493677;
 constexpr float PI_MASS = 0.139571;
 
+
+
+inline auto printDirectDaughters(const auto mom, bool print){
+
+  for(size_t dauIdx = 0; dauIdx < mom->numberOfDaughters(); ++dauIdx){
+    if (print){
+    std::cout << "Mom is: "<< mom->pdgId() << std::endl;
+    std::cout << "and has direct daughter: " << mom->daughter(dauIdx)->pdgId() << std::endl;
+    }
+
+    if((mom->daughter(dauIdx)->pdgId() == 22)){
+
+    auto photon = mom->daughter(dauIdx);
+    //photonEnergy = mom->daughter(dauIdx)->energy();
+    return photon;
+    }
+
+  }
+  const reco::Candidate* empty = nullptr;
+  return empty;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////
 // checks if B+ -> Ds K Nu Mu
 
@@ -82,11 +106,33 @@ inline int isSignal(const auto mom){
 
   std::set<int> dau_list;
  
-  int nDaus = mom->numberOfDaughters();
+  size_t nDaus = 0;
 
   for(size_t dauIdx = 0; dauIdx < mom->numberOfDaughters(); ++dauIdx){
-    dau_list.insert( abs(mom->daughter(dauIdx)->pdgId()) );
+ 
+    unsigned int dauId = abs(mom->daughter(dauIdx)->pdgId());
+  
+    if(dauId == 22){ 
+      //std::cout << "found photon!!" << std::endl;
+      //auto dummy = printDirectDaughters(mom, true);
+      // These are soft-photons, f.e. FSR, which however are assigned 'promptly'
+      // to the Bs. I.e. the decays often look like: Bs -> Ds + mu + nu + gamma + gamma
+      // But nevertheless, this is still a signal, we checked that they are low energy.
+      
+      continue; 
+    }
+   
+    else{
+      dau_list.insert( dauId );
+      ++nDaus;
+    }
+
   }
+
+  // now compare the daughters with the signal daughters
+  // the comparison of the number of daughters is important to avoid decays where
+  // we would have the same daughters but in a different multiplicity (even if I can
+  // not think of any... but lets be sure! )
 
   if      ((dau_list == signal_dsmu)      && (nDaus == 3)) foundSignal = 0;
   else if ((dau_list == signal_dsstarmu)  && (nDaus == 3)) foundSignal = 10;
@@ -108,20 +154,7 @@ inline void printDaughters(const auto mom){
   }
   return;
 }
-///////////////////////////////////////////////////////////////////////////////////
-// function which prints only direct daughters 
 
-inline int printDirectDaughters(const auto mom, bool print){
-
-  for(size_t dauIdx = 0; dauIdx < mom->numberOfDaughters(); ++dauIdx){
-    if (print){
-    std::cout << "Mom is: "<< mom->pdgId() << std::endl;
-    std::cout << "and has direct daughter: " << mom->daughter(dauIdx)->pdgId() << std::endl;
-    }
-
-  }
-  return mom->numberOfDaughters();
-}
 ///////////////////////////////////////////////////////////////////////////////////
 // function which prints all moms 
 
