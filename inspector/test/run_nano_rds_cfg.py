@@ -2,8 +2,8 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 import FWCore.ParameterSet.Config as cms
 
 # TODO: put different samples into parser (flag from command line)
-channel = 'sig'
-insp    = 'hammer' # reco hammer gensim
+channel = 'dsmu'
+insp    = 'gen' # reco hammer gen
 
 import os
 
@@ -37,11 +37,12 @@ process.Timing = cms.Service("Timing",
 #load all the chosen options
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(5)
+    input = cms.untracked.int32(200)
 )
 
 def filesFromFolder(directory):
   filenames = os.listdir(directory)
+  for name in filenames: print(name)
   return ['file:' + directory + filename for filename in filenames ]
 
 def filesFromTxt(txtFile):
@@ -66,12 +67,19 @@ if channel == 'sig':
     inputfiles = filesFromTxt(directory)
 
 if channel == 'hb':
-  directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/inclusive_HbToDsPhiKKPiMuNu_MINI_25mar21_v1/' #hb 
+
+  if insp == "gen":
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_56_33/' #higher stats
+  else:
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/inclusive_HbToDsPhiKKPiMuNu_MINI_25mar21_v1/' #hb (riccardos mini)
+
   inputfiles = filesFromFolder(directory)
+
+
 
 if channel == 'bplus':
 
-  if insp == 'gensim':
+  if insp == 'gen':
     directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_03_06_2024_19_15_19/" # old filter
     directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_11_06_2024_09_03_41/" # old filter includes all decays for crosscheck
     inputfiles = filesFromFolder(directory)
@@ -88,11 +96,13 @@ if channel == 'lambdab':
 
 if channel == 'bs':
 
-  if insp == 'gensim':
+  if insp == 'gen':
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/'  # old filter
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_26_08_2024_16_13_34/'  # old filte but different channel
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_26_08_2024_19_27_38/'  # old filte but different channel and more stats!
     #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_09_52_40/'  # new filter
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_10_06_2024_17_46_51/'#
-    inputfiles = filesFromFolder(directory)[0:10]
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_10_06_2024_17_46_51/'#
+    inputfiles = filesFromFolder(directory)
     naming = 'bs'
 
   if insp == 'reco':
@@ -102,7 +112,7 @@ if channel == 'bs':
 
 if channel == 'b0':
 
-  if insp == 'gensim':
+  if insp == 'gen':
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_06_06_2024_20_38_57/'  # new filter
     inputfiles = filesFromFolder(directory)[0:20]
     naming = 'b0'
@@ -112,7 +122,18 @@ if channel == 'b0':
     inputfiles = filesFromTxt(directory)
     naming = 'b0'
 
+if channel == "dstau":
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dstau_fragment_27_09_2024_11_26_41/'  # old filter
+  inputfiles = filesFromFolder(directory)
+  naming = 'dstau'
 
+if channel == "dsmu":
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_fragment_15_10_2024_13_04_12/'  # old filter
+  inputfiles = filesFromFolder(directory)
+  naming = 'dsmu'
+
+print(inputfiles)
+inputfiles = inputfiles[0:1]
 
 
 if channel == 'data':
@@ -126,12 +147,13 @@ process.source = cms.Source(
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/40000/56D888ED-EB2C-B24F-A5A0-8D162DAFFA25.root'), #data file to compare with riccs MA code
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/50002/D0AE1369-0D7B-554C-BBB9-7B324AACCABD.root'), #data file to compare with riccs MA code
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/50002/36CD4F31-A249-DF49-A3FF-32DCA7223D09.root'), #10
-    #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/data/Run2018D/ParkingBPH1/MINIAOD/UL2018_MiniAODv2-v1/40000/56D888ED-EB2C-B24F-A5A0-8D162DAFFA25.root'), #7
+    #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch///store/mc/RunIISummer20UL18MiniAODv2/BsToDoubleCharm_DsFilter_PhiFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/Custom_RDStarPU_BParking_106X_upgrade2018_realistic_v16_L1v1-v1/2820000/FD3D3434-1FAA-D743-914D-D3F4A122FAAD.root'), #7
     fileNames = cms.untracked.vstring(inputfiles),# all_signals_HbToDsPhiKKPiMuNu_MT_0.root'), #automized case
     #fileNames = cms.untracked.vstring("file:/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/bs_fragment_chunk3_03_06_2024_19_15_47.root"),
     #fileNames = cms.untracked.vstring('file:root://cms-xrd-global.cern.ch////store/mc/RunIISummer20UL18MiniAODv2/BsToDoubleCharm_DsFilter_PhiFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/Custom_RDStarPU_BParking_106X_upgrade2018_realistic_v16_L1v1-v1/2820000/CEF9599E-F695-554B-97D2-276663715216.root'),
     #fileNames = cms.untracked.vstring("file:/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_10_06_2024_17_46_51/bs_fragment_chunk9_10_06_2024_17_46_51.root"),
 
+    #eventsToProcess  = cms.untracked.VEventRange('1:22955'),
     secondaryFileNames = cms.untracked.vstring(),
     #skipEvents=cms.untracked.uint32(0) # skip first n events   
 )
@@ -180,21 +202,15 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 from rds.inspector.nanoRDs_cff import *
 
 #can only gen match on mc
-if insp =="gensim":
-  process = nanoAOD_customizeGENSIMMatching(process) 
-  process.nanoAOD_Bs_step= cms.Path(process.nanoGENSIMMatchingSequence)
-if insp =="reco":
+if insp =="gen":
+  process = nanoAOD_customizeGENMatching(process) 
+  process.nanoAOD_Bs_step= cms.Path(process.nanoGENMatchingSequence)
+elif insp =="reco":
   process = nanoAOD_customizeGenMatching(process) 
   # Path and EndPath definitions
   process.nanoAOD_Bs_step= cms.Path(process.nanoGenMatchingSequence)
-if insp =="hammer":
-  process = nanoAOD_customizeHAMMERMatching(process) 
-  # Path and EndPath definitions
-  process.nanoAOD_Bs_step= cms.Path(process.nanoHAMMERMatchingSequence)
-
-
-
-
+else:
+  print("Not a valid inspector type! There are 'gen' or 'reco'")
 
 
 #process.nanoAOD_Bs_step= cms.Path(process.triggerSequence) ## to run only Trigger.cc for debugging

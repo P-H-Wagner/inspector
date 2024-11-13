@@ -144,6 +144,7 @@ private:
   const edm::EDGetTokenT<reco::VertexCollection> primaryVtx_;
 
   //gen for gen-matching
+  //on reco level, these collections are called pruned/packed
   const edm::InputTag prunedGenTag; //pruned is a compressed packed format
   const edm::EDGetTokenT<reco::GenParticleCollection> prunedGen_;
 
@@ -508,6 +509,7 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
              gen.addUserFloat("sv_x_gen"      ,sv_x_gen);//This is the ds production vertex!
              gen.addUserFloat("sv_y_gen"      ,sv_y_gen);
              gen.addUserFloat("sv_z_gen"      ,sv_z_gen);
+             gen.addUserFloat("ds_gen_m"      ,dsFromPi->mass());
              gen.addUserFloat("ds_gen_charge" ,dsFromPi->charge());
              gen.addUserInt(  "ds_gen_pdgid"  ,dsFromPi->pdgId());
 
@@ -526,6 +528,7 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
              gen.addUserFloat("scnd_pv_z_gen"      ,scnd_pv_z_gen);
              gen.addUserInt("scnd_pv_idx_gen"      ,goldenIdxGen);
 
+             gen.addUserFloat("bs_gen_m"      ,bsFromMu->mass());
              gen.addUserFloat("bs_gen_charge" ,bsFromMu->charge());
              gen.addUserInt(  "bs_gen_pdgid"  ,bsFromMu->pdgId());
              gen.addUserFloat("b_boost_gen"   ,genBsTlv.BoostVector().Mag());
@@ -701,7 +704,8 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
              }
 
              //bool isNotDoubleCharm = false;
-              
+             auto photonPtr = printDirectDaughters(bsFromMu, false); //set true for debugging
+ 
              //std::cout << "candidate nr: " << nRecoCandidates << std::endl;
              int dsID = getDsID(piPtrGen); // get charmed strange ID
              //std::cout << "ds Id is: " << dsID << std::endl;
@@ -722,6 +726,13 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
 
              if (abs(bMotherId) == 531) checkSignal = isSignal(bsFromMu); 
              if (abs(bMotherId) == 521) checkKNuMu  = isKNuMu(bsFromMu); 
+
+             if (checkSignal==-1){
+               std::cout << "this is not tagged as signal" << std::endl;
+               printDaughters(bsFromMu);
+             }
+
+
 
              // Signal candidates enter here
              if (checkSignal != -1)    sigId = checkSignal;
@@ -836,6 +847,13 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
 
              //}
 
+
+             // soft photon?
+             double photonEnergy;
+             if (photonPtr != nullptr) photonEnergy =photonPtr->energy(); 
+             else photonEnergy = std::nan("nan");
+
+             gen.addUserFloat("photon_energy", photonEnergy); 
 
              //define helicity angles
 

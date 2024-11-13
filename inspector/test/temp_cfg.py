@@ -90,14 +90,14 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 from rds.inspector.nanoRDs_cff import *
 
 
-if HOOK_GENSIM:
-  process = nanoAOD_customizeGENSIMMatching(process)
-  process.nanoAOD_Bs_step= cms.Path(process.nanoGENSIMMatchingSequence)
+if "HOOK_INSP" == 'gen':
+  process = nanoAOD_customizeGENMatching(process)
+  process.nanoAOD_Bs_step= cms.Path(process.nanoGENMatchingSequence)
 
-else: 
-
+if "HOOK_INSP" == 'reco':
   process = nanoAOD_customizeGenMatching(process)
   process.nanoAOD_Bs_step= cms.Path(process.nanoGenMatchingSequence  )
+
 
 
 process.endjob_step = cms.EndPath(process.endOfProcess)

@@ -7,7 +7,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('channel') # sig or hb or data
 parser.add_argument('nFiles')  # nr of miniAOD files to process
-parser.add_argument('inspector')  # which inspector to run (reco, gensim, hammer) 
+parser.add_argument('inspector')  # which inspector to run (reco, gen) 
 args = parser.parse_args()
 
 ######################################
@@ -18,13 +18,13 @@ nMaxJobs = 800
 #default
 filesPerJob = 2
 
-if (int(args.nFiles) < nMaxJobs) and (int(args.nFiles) != -1):
+if args.inspector == "gen":
   filesPerJob = 1 #below 500 jobs we can take 1 file per job and thus short
-  queue = 'short' 
-  time  = 60
+  queue = 'standard' 
+  time  = 720
 else:
   queue = 'short'
-  time =30
+  time =45
 print("========> processing ", filesPerJob, " files per job")
 
 ######################################
@@ -53,23 +53,15 @@ def filesFromTxt(txtFile):
 
 if args.channel == 'sig':
 
-  if args.inspector == 'hammer':
-
-    directory = "/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/sig_fragment_19_07_2024_12_53_00/"
-    inputfiles = filesFromTxt(directory)
-    naming = 'signals_hammer'
-
-  else:
-
     #directory = '/pnfs/psi.ch/cms/trivcat/store/user/manzoni/all_signals_HbToDsPhiKKPiMuNu_MT_MINI_21jan23_v1/' #old signal from MA thesis
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/signals/all_signals_request_21_11_23.txt' # new signals!!
     #inputfiles = filesFromFolder(directory)
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/signals/all_signals_request_21_11_23.txt' # new signals!!
     inputfiles = filesFromTxt(directory)
     naming = 'all_signals'
 
 if args.channel == 'hb':
 
-  if args.inspector == "gensim":
+  if args.inspector == "gen":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_06_45/'
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_56_33/' #higher stats
     inputfiles = filesFromFolder(directory)
@@ -82,9 +74,8 @@ if args.channel == 'hb':
 
 if args.channel == 'b0':
 
-  if args.inspector == "gensim":
+  if args.inspector == "gen":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_03_06_2024_22_52_56/' 
-    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/b0_fragment_06_06_2024_20_38_57/'  # new filter 
     inputfiles = filesFromFolder(directory)
 
   if args.inspector == "reco":
@@ -95,7 +86,7 @@ if args.channel == 'b0':
 
 if args.channel == 'bplus':
 
-  if args.inspector == "gensim":
+  if args.inspector == "gen":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bplus_fragment_03_06_2024_19_15_19/' 
     inputfiles = filesFromFolder(directory)
 
@@ -106,11 +97,14 @@ if args.channel == 'bplus':
 
 if args.channel == 'bs':
 
-  if args.inspector == "gensim":
+  if args.inspector == "gen":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_03_06_2024_19_15_47/'  # old filter
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_26_08_2024_16_13_34/'  # old filte but different channel
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_26_08_2024_19_27_38/'  # old filte but different channel and more stats!
     #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_09_52_40'  # new filter
     #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/bs_fragment_06_06_2024_20_38_57'  # new filter
     inputfiles = filesFromFolder(directory)
+
   if args.inspector == "reco":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/bs/bs.txt' #bs 
     inputfiles = filesFromTxt(directory)
@@ -118,7 +112,7 @@ if args.channel == 'bs':
 
 if args.channel == 'lambdab':
 
-  if args.inspector == "gensim":
+  if args.inspector == "gen":
     directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/lambdab_fragment_04_06_2024_09_40_54' 
     inputfiles = filesFromFolder(directory)
 
@@ -132,6 +126,38 @@ if args.channel == 'data':
   #txtFile = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/data/dataTest/single.txt' # test
   inputfiles = filesFromTxt(directory)
   naming = 'data'
+
+if args.channel == "dstau":
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dstau_fragment_12_11_2024_14_56_51/'  
+  inputfiles = filesFromFolder(directory)
+  naming = 'dstau'
+
+if args.channel == "dsstartau":
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsstartau_fragment_12_11_2024_14_57_15/' 
+  inputfiles = filesFromFolder(directory)
+  naming = 'dsstartau'
+
+if args.channel == "dsmu":
+ 
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_fragment_12_11_2024_15_21_32/' 
+  #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_isgw2_fragment_12_11_2024_16_37_47/' 
+  inputfiles = filesFromFolder(directory)
+  naming = 'dsmu'
+
+if args.channel == "dsmu_isgw2":
+ 
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_isgw2_fragment_12_11_2024_22_14_08/' 
+  #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_isgw2_fragment_12_11_2024_16_37_47/' 
+  inputfiles = filesFromFolder(directory)
+  naming = 'dsmu_isgw2'
+
+if args.channel == "dsstarmu":
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsstarmu_fragment_12_11_2024_15_21_41/'  
+  inputfiles = filesFromFolder(directory)
+  naming = 'dsstarmu'
+
+
+
 
 if nFiles != -1:
   #process not the whole dataset but only nFiles
@@ -158,7 +184,7 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
     elif "HOOK_N_EVENTS" in line: cfg.write(line.replace("HOOK_N_EVENTS", str(nevents)))
     elif "HOOK_FILE_IN" in line: cfg.write(line.replace("HOOK_FILE_IN", str(fin)))
     elif "HOOK_FILE_OUT" in line: cfg.write(line.replace("HOOK_FILE_OUT", fout))
-    elif "HOOK_GENSIM" in line: cfg.write(line.replace("HOOK_GENSIM", str(GENSIM)))
+    elif "HOOK_INSP" in line: cfg.write(line.replace("HOOK_INSP", args.inspector))
     else: cfg.write(line)
 
   temp.close()
@@ -166,7 +192,7 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
 
   to_write = '\n'.join([
          '#!/bin/bash',
-         'cd /work/pahwagne/releases/CMSSW_10_6_37/src/rds/inspector/test/'+dt_string ,
+         'cd /work/pahwagne/inspector/CMSSW_10_6_37/src/rds/inspector/test/'+dt_string ,
          'scramv1 runtime -sh',
          'mkdir -p /scratch/pahwagne/'+dt_string,
          'ls /scratch/pahwagne/',
@@ -189,7 +215,7 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
         '-e {0}/errs/chunk_{1}.err'.format(dt_string,i),
         #'--mem=1200M',
         '--job-name=MINI_{0}_{1}'.format(i,args.channel),
-        '--time={0}'.format(time),
+        #'--time={0}'.format(time),
         '{0}/submitter_chunk_{1}.sh'.format(dt_string,i),
      ])
 
