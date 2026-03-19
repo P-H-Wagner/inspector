@@ -35,7 +35,7 @@ process.Timing = cms.Service("Timing",
 )
 
 #load all the chosen options
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(HOOK_N_EVENTS)
 )

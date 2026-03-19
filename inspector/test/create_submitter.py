@@ -16,22 +16,16 @@ args = parser.parse_args()
 nMaxJobs = 800
 
 #default
-filesPerJob = 2
-
-if args.inspector == "gen":
-  filesPerJob = 1 #below 500 jobs we can take 1 file per job and thus short
-  queue = 'standard' 
-  time  = 720
-else:
-  queue = 'short'
-  time =45
+filesPerJob = 1
+queue = 'short'
+time =45
 print("========> processing ", filesPerJob, " files per job")
 
 ######################################
 
 #queue = 'standard'
 #time = 60
-nevents = -1
+nevents = 500
 nFiles = int(args.nFiles)
 now = datetime.now()
 dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
@@ -62,9 +56,11 @@ if args.channel == 'sig':
 if args.channel == 'hb':
 
   if args.inspector == "gen":
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_06_45/'
-    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_56_33/' #higher stats
-    inputfiles = filesFromFolder(directory)
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_06_45/'
+    #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/hb_fragment_11_06_2024_18_56_33/' #higher stats
+    directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/mc/hb/inclusive/private_prod/hb_inclusive_crab_20250605_133227.txt' #private production
+    #inputfiles = filesFromFolder(directory)
+    inputfiles = filesFromTxt(directory)
 
 
   if args.inspector == "reco":
@@ -129,33 +125,40 @@ if args.channel == 'data':
 
 if args.channel == "dstau":
   directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dstau_fragment_12_11_2024_14_56_51/'  
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dstau_fragment_14_11_2024_13_17_18/' #more stats!  
   inputfiles = filesFromFolder(directory)
   naming = 'dstau'
 
 if args.channel == "dsstartau":
   directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsstartau_fragment_12_11_2024_14_57_15/' 
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsstartau_fragment_14_11_2024_15_26_04/' #more stats! 
   inputfiles = filesFromFolder(directory)
   naming = 'dsstartau'
 
 if args.channel == "dsmu":
  
   directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_fragment_12_11_2024_15_21_32/' 
-  #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_isgw2_fragment_12_11_2024_16_37_47/' 
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_fragment_13_11_2024_18_58_31/' #more stats! 
   inputfiles = filesFromFolder(directory)
   naming = 'dsmu'
 
 if args.channel == "dsmu_isgw2":
  
   directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_isgw2_fragment_12_11_2024_22_14_08/' 
-  #directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_isgw2_fragment_12_11_2024_16_37_47/' 
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsmu_isgw2_fragment_16_11_2024_12_18_09/' #more stats! 
   inputfiles = filesFromFolder(directory)
   naming = 'dsmu_isgw2'
 
 if args.channel == "dsstarmu":
   directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsstarmu_fragment_12_11_2024_15_21_41/'  
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsstarmu_fragment_14_11_2024_09_38_51/' #more stats!  
   inputfiles = filesFromFolder(directory)
   naming = 'dsstarmu'
 
+if args.channel == "dsstarmu_isgw2":
+  directory = '/pnfs/psi.ch/cms/trivcat/store/user/pahwagne/miniAOD/dsstarmu_isgw2_fragment_18_11_2024_15_42_17/' #more stats!  
+  inputfiles = filesFromFolder(directory)
+  naming = 'dsstarmu_isgw2'
 
 
 
@@ -192,14 +195,37 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
 
   to_write = '\n'.join([
          '#!/bin/bash',
-         'cd /work/pahwagne/inspector/CMSSW_10_6_37/src/rds/inspector/test/'+dt_string ,
-         'scramv1 runtime -sh',
+         # --- create scratch dir and create temp .sh file in scratch ---
          'mkdir -p /scratch/pahwagne/'+dt_string,
+         'payload=/scratch/pahwagne/'+dt_string+'/apptainer-payload-{0}.sh'.format(i),
+         # --- write into temp ---
+         'cat > "$payload" << EOF',
+         'cd /work/pahwagne/inspector/CMSSW_10_6_37/src/rds/inspector/',
+         'source $VO_CMS_SW_DIR/cmsset_default.sh',
+         'export SCRAM_ARCH=slc7_amd64_gcc700', #export new arch
+         'cmsenv',
+         'echo ">>>> cmsenv activated"',
+                 
+         'cd /work/pahwagne/CMSSW_10_6_37/src/' ,
+         'scramv1 runtime -sh',
+         'cd /work/pahwagne/inspector/CMSSW_10_6_37/src/rds/inspector/test/'+dt_string ,
+
          'ls /scratch/pahwagne/',
          'cmsRun cfg_chunk_{1}.py'.format(dt_string,i),
-         'xrdcp /scratch/pahwagne/{0}/{1}_chunk_{2}.root root://t3dcachedb.psi.ch:1094///pnfs/psi.ch/cms/trivcat/store/user/pahwagne/inspector/{0}/{1}_chunk_{2}.root'.format(dt_string,naming,i),
+         'xrdcp /scratch/pahwagne/{0}/{1}_chunk_{2}.root root://t3dcachedb03.psi.ch:1094///pnfs/psi.ch/cms/trivcat/store/user/pahwagne/inspector/{0}/{1}_chunk_{2}.root'.format(dt_string,naming,i),
          'rm /scratch/pahwagne/{0}/{1}_chunk_{2}.root'.format(dt_string,naming,i),
          '',
+         'EOF',
+         # --- close tmp file ---
+         'echo "printing payload content:"',
+         'cat /scratch/pahwagne/'+dt_string+'/apptainer-payload-{0}.sh'.format(i),
+         'rm /scratch/pahwagne/{0}/{1}_chunk_{2}.root'.format(dt_string,naming,i),
+         'echo ">>>> Done, launching cfg "',
+         # --- make payload executable and run it in el7 singularity ---
+         'chmod u+x "$payload"',
+         '/cvmfs/cms.cern.ch/common/cmssw-el7  --bind /scratch,/work --command-to-run $payload'
+         
+
      ])
 
   with open("{0}/submitter_chunk_{1}.sh".format(dt_string,i), "wt") as flauncher:
@@ -215,7 +241,7 @@ for i,j in enumerate(range(0, len(inputfiles), filesPerJob)):
         '-e {0}/errs/chunk_{1}.err'.format(dt_string,i),
         #'--mem=1200M',
         '--job-name=MINI_{0}_{1}'.format(i,args.channel),
-        #'--time={0}'.format(time),
+        '--time={0}'.format(time),
         '{0}/submitter_chunk_{1}.sh'.format(dt_string,i),
      ])
 

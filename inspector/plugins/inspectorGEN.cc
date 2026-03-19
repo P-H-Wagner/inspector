@@ -200,7 +200,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
   //count the number of gen matches we find, ideally only 1
   int nGenMatches = 0;
 
-  //std::cout << "New event!" << iEvent.id().event() <<std::endl;
+  std::cout << "New event!" << iEvent.id().event() <<std::endl;
 
   ////////////////////////////////////////////////////
   // find the gen-matched muon                      //
@@ -216,6 +216,8 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
     // We dont want any filter, we only tag gen
     if((fabs(muPtrGen->pdgId()) != 13)) continue; 
 
+    //std::cout << "found muon" << std::endl;
+
     ////////////////////////////////////////////////
     // find gen matched k1                        //
     ////////////////////////////////////////////////
@@ -229,6 +231,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
       // We dont want any filter, we only tag gen
       if((fabs(k1PtrGen->pdgId()) != 321)) continue; 
       kaons++;
+      //std::cout << "found kaon" << std::endl;
 
       ////////////////////////////////////////////////
       // find gen matched k2                        //
@@ -245,6 +248,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
            // We dont want any filter, we only tag gen
            if((fabs(k2PtrGen->pdgId()) != 321)) continue;   
 
+           //std::cout << "found kaon" << std::endl;
            beforePhiMass++;
            ////////////////////////////////////////////////
            // find gen matched pion                      //
@@ -261,6 +265,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              // We dont want any filter, we only tag gen
              if((fabs(piPtrGen->pdgId()) != 211)) continue;  
 
+             //std::cout << "found pion" << std::endl;
              //////////////////////////////////////////////////
              // Find resonances at gen level                 //
              //////////////////////////////////////////////////
@@ -269,6 +274,8 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              nKKPiMuGEN++;     
 
              //Should we pick the best gen match (in terms of dR) only? -> No, like this is better 
+
+             //std::cout<< "found candiadte!" << std::endl;
 
              const reco::Candidate* k1Reco = k1PtrGen.get(); 
              const reco::Candidate* k2Reco = k2PtrGen.get(); 
@@ -282,12 +289,14 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              if( (phiFromK1 != phiFromK2) || (phiFromK1 == nullptr) || (phiFromK2 == nullptr)) continue; 
              nFoundPhiGEN++;               
    
-             //std::cout<< "found phi candiadte!" << std::endl;
+             //std::cout<< "found phi candiadte!" << phiFromK2->mass() << std::endl;
 
              // searching for ds resonance 
              auto dsFromPhi = getAncestor(phiFromK1,431);
              auto dsFromPi  = getAncestor(piReco,431);
+
              if( (dsFromPhi != dsFromPi) || (dsFromPhi == nullptr) || (dsFromPi == nullptr)) continue; 
+             //printDaughters(dsFromPi);
              nFoundDsGEN++;               
 
              //std::cout<< "found ds candiadte!" << std::endl;
@@ -329,14 +338,20 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
 
              auto bsFromMu = getAncestor(muReco,   bMotherId);
 
-             //std::cout << "bs from mu has chain: " << std::endl;
+             std::cout << "bs from mu has chain: " << std::endl;
              //printDaughters(bsFromMu);
 
-             if( (bsFromDs != bsFromMu) || (bsFromDs == nullptr) || (bsFromMu == nullptr)) {
+
+             if(  (bsFromDs == nullptr) || (bsFromMu == nullptr)) continue;
+             int sameMother = 0;
+             if (bsFromDs == bsFromMu) sameMother = 1;
+             if (sameMother == 0 ) std::cout << "not the same mom!!" << std::endl;
+ 
+             std::cout << "found a b mom!" << std::endl;
+
+             //if( (bsFromDs != bsFromMu) || (bsFromDs == nullptr) || (bsFromMu == nullptr)) continue;
  
              //std::cout << "b pointer is null" << std::endl; 
-             continue;
-             } 
  
              nFoundBGEN++;
              
@@ -365,24 +380,35 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              TLorentzVector genMissTlv; //for m2 miss 
              TLorentzVector genQTlv;  // for q2
 
-             genMuTlv.SetXYZM(  muPtrGen->px(),      muPtrGen->py(),      muPtrGen->pz(),      muMass_);
-             genK1Tlv.SetXYZM(  k1PtrGen->px(),      k1PtrGen->py(),      k1PtrGen->pz(),      kMass_);
-             genK2Tlv.SetXYZM(  k2PtrGen->px(),      k2PtrGen->py(),      k2PtrGen->pz(),      kMass_);
-             genPiTlv.SetXYZM(  piPtrGen->px(),      piPtrGen->py(),      piPtrGen->pz(),      piMass_);
+             genMuTlv.SetXYZM(  muPtrGen->px(),      muPtrGen->py(),      muPtrGen->pz(),   muPtrGen->mass());     //muMass_);
+             genK1Tlv.SetXYZM(  k1PtrGen->px(),      k1PtrGen->py(),      k1PtrGen->pz(),   k1PtrGen->mass());     //kMass_);
+             genK2Tlv.SetXYZM(  k2PtrGen->px(),      k2PtrGen->py(),      k2PtrGen->pz(),   k2PtrGen->mass());     //kMass_);
+             genPiTlv.SetXYZM(  piPtrGen->px(),      piPtrGen->py(),      piPtrGen->pz(),   piPtrGen->mass());     //piMass_);
 
-             genPhiTlv.SetXYZM( phiFromK1->px(),     phiFromK1->py(),     phiFromK1->pz(),     phiMass_);
-             genDsTlv.SetXYZM(  dsFromPi->px(),      dsFromPi->py(),      dsFromPi->pz(),      dsMass_);
+             genPhiTlv.SetXYZM( phiFromK1->px(),     phiFromK1->py(),     phiFromK1->pz(),   phiFromK1->mass());  //phiMass_);
+             genDsTlv.SetXYZM(  dsFromPi->px(),      dsFromPi->py(),      dsFromPi->pz(),    dsFromPi->mass());  //dsMass_);
              //genBsTlv.SetXYZM(  bsFromMuWOOsc->px(), bsFromMuWOOsc->py(), bsFromMuWOOsc->pz(), bsMass_); //changed
-             genBsTlv.SetXYZM(  bsFromMu->px(), bsFromMu->py(), bsFromMu->pz(), bsMass_); //changed
+             genBsTlv.SetXYZM(  bsFromMu->px(),      bsFromMu->py(),      bsFromMu->pz(),    bsFromMu->mass()); //bsMass_); //changed
 
              genMissTlv = genBsTlv - (genDsTlv + genMuTlv); 
              genQTlv    = genBsTlv - (genDsTlv); 
+
+
+             //std::cout << "before e star function: " << genBsTlv.Px() << std::endl;
+             //std::cout << "before e star function: " << genBsTlv.Py() << std::endl;
+             //std::cout << "before e star function: " << genBsTlv.Pz() << std::endl;
+             //std::cout << "before e star function: " << genBsTlv.M() << std::endl;
 
              float m2_miss_gen = genMissTlv.M2();
              float pt_miss_gen = genMissTlv.Pt();
              float q2_gen = genQTlv.M2();
              float e_star_gen   = getEStar(genBsTlv,genMuTlv);
              float e_gamma_gen  = getEGamma(genDsTlv, dsMass_, dsStarMass_);
+
+             //std::cout << "after e star function: " << genBsTlv.Px() << std::endl;
+             //std::cout << "after e star function: " << genBsTlv.Py() << std::endl;
+             //std::cout << "after e star function: " << genBsTlv.Pz() << std::endl;
+             //std::cout << "after e star function: " << genBsTlv.M() << std::endl;
 
              gen.addUserFloat("m2_miss_gen",m2_miss_gen);
              gen.addUserFloat("pt_miss_gen",pt_miss_gen);
@@ -455,7 +481,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              gen.addUserFloat("pi_gen_pt"      ,piPtrGen->pt());
              gen.addUserFloat("pi_gen_eta"     ,piPtrGen->eta());
              gen.addUserFloat("pi_gen_phi"     ,piPtrGen->phi());
-             gen.addUserFloat("pi_gen_m"    ,piPtrGen->mass());
+             gen.addUserFloat("pi_gen_m"       ,piPtrGen->mass());
              gen.addUserFloat("pi_gen_charge"  ,piPtrGen->charge());
              gen.addUserInt(  "pi_gen_pdgid"   ,piPtrGen->pdgId());
 
@@ -499,11 +525,11 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              gen.addUserFloat("pv_y_gen"      ,pv_y_gen);
              gen.addUserFloat("pv_z_gen"      ,pv_z_gen);
 
-             gen.addUserFloat("bs_gen_m"      ,bsFromMu->mass());
-             gen.addUserFloat("bs_gen_charge" ,bsFromMu->charge());
-             gen.addUserInt(  "bs_gen_pdgid"  ,bsFromMu->pdgId());
-             gen.addUserFloat("b_boost_gen"   ,genBsTlv.BoostVector().Mag());
-             gen.addUserFloat("b_boost_gen_pt"   ,genBsTlv.BoostVector().Pt());
+             gen.addUserFloat("bs_gen_m"          ,bsFromMu->mass());
+             gen.addUserFloat("bs_gen_charge"     ,bsFromMu->charge());
+             gen.addUserInt(  "bs_gen_pdgid"      ,bsFromMu->pdgId());
+             gen.addUserFloat("b_boost_gen"       ,genBsTlv.BoostVector().Mag());
+             gen.addUserFloat("b_boost_gen_pt"    ,genBsTlv.BoostVector().Pt());
              gen.addUserFloat("b_boost_gen_eta"   ,genBsTlv.BoostVector().Eta());
              gen.addUserFloat("b_boost_gen_phi"   ,genBsTlv.BoostVector().Phi());
 
@@ -511,6 +537,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              gen.addUserFloat("fv_x_gen"       ,fv_x_gen);//This is the kaon production vertex!
              gen.addUserFloat("fv_y_gen"       ,fv_y_gen);
              gen.addUserFloat("fv_z_gen"       ,fv_z_gen);
+
 
 
              ///////////////////////////// 
@@ -553,7 +580,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              if (abs(bMotherId) == 521) checkKNuMu  = isKNuMu(bsFromMu); 
 
              if (checkSignal==-1){
-               std::cout << "this is not tagged as signal" << std::endl;
+               //std::cout << "this is not tagged as signal" << std::endl;
                //printDaughters(bsFromMu);
              }
 
@@ -615,6 +642,16 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              float dsStar_gen_m;
              int   dsStar_gen_pdgid; 
 
+             float nu_gen_pt   ;
+             float nu_gen_eta  ;
+             float nu_gen_phi  ;
+             float nu_gen_m    ;
+             int   nu_gen_pdgid;
+             
+
+
+
+
              if (sigId == 0){
 
                //  Bs -> Ds + mu + nu 
@@ -629,6 +666,15 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
                dsStar_gen_phi   = std::nan("nan");
                dsStar_gen_m     = std::nan("nan");
                dsStar_gen_pdgid = -9999;
+
+               nu_gen_pt    = std::nan("nan");
+               nu_gen_eta   = std::nan("nan");
+               nu_gen_phi   = std::nan("nan");
+               nu_gen_m     = std::nan("nan");
+               nu_gen_pdgid = -9999;
+
+
+
 
              }
 
@@ -652,6 +698,14 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
                dsStar_gen_m     = std::nan("nan");
                dsStar_gen_pdgid = -9999;
 
+               nu_gen_pt    = std::nan("nan");
+               nu_gen_eta   = std::nan("nan");
+               nu_gen_phi   = std::nan("nan");
+               nu_gen_m     = std::nan("nan");
+               nu_gen_pdgid = -9999;
+               
+
+
              }
 
              else if (sigId == 10){
@@ -666,14 +720,61 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
 
                // get the Ds* (we know its there)
                auto dsStarFromDs = getAncestor(dsFromPi,433);
+               auto nuFromBs     = getDaughter(bsFromMu, 14, 13);
 
                dsStar_gen_pt    = dsStarFromDs->pt();
                dsStar_gen_eta   = dsStarFromDs->eta();
                dsStar_gen_phi   = dsStarFromDs->phi();
-               dsStar_gen_m     = dsStarMass_; 
+               dsStar_gen_m     = dsStarFromDs->mass(); 
                dsStar_gen_pdgid = dsStarFromDs->pdgId();
 
+
+               nu_gen_pt    = nuFromBs->pt();
+               nu_gen_eta   = nuFromBs->eta();
+               nu_gen_phi   = nuFromBs->phi();
+               nu_gen_m     = nuFromBs->mass();
+               nu_gen_pdgid = nuFromBs->pdgId();
+              
+
+               //std::cout << "adress of selected daughters: " << std::endl; 
+               //std::cout << bsFromMu     << " " << std::endl; 
+               //std::cout << dsStarFromDs << " " << std::endl; 
+               //std::cout << muReco       << " " << std::endl; 
+               //std::cout << nuFromBs     << " " << std::endl; 
+
+               //std::cout << "nu_gen_pt="    << nu_gen_pt    << " "
+               //          << "nu_gen_eta="   << nu_gen_eta   << " "
+               //          << "nu_gen_phi="   << nu_gen_phi   << " "
+               //          << "nu_gen_mt="    << nu_gen_m     << " " 
+               //          << "nu_gen_e="     << nuFromBs->energy() << " " << std::endl;
+              
+               //std::cout << "dsStar_gen_pt="    << dsStar_gen_pt    << " "
+               //          << "dsStar_gen_eta="   << dsStar_gen_eta   << " "
+               //          << "dsStar_gen_phi="   << dsStar_gen_phi   << " "
+               //          << "dsStar_gen_m="     << dsStar_gen_m     << " " << std::endl;
+
+               //std::cout << "tau_gen_pt="    <<  tau_gen_pt         << " "
+               //          << "tau_gen_eta="   <<  tau_gen_eta        << " "
+               //          << "tau_gen_phi="   <<  tau_gen_phi        << " "
+               //          << "tau_gen_m="     <<  tau_gen_m          << " " << std::endl;
+
+               //std::cout << "bs_gen_pt="    << bsFromMu->pt()     << " "
+               //          << "bs_gen_eta="   << bsFromMu->eta()    << " "
+               //          << "bs_gen_phi="   << bsFromMu->phi()    << " "
+               //          << "bs_gen_m="     << bsFromMu->mass()   << " " << std::endl;
+ 
+               //TLorentzVector genDsStarTlv; 
+               //genDsStarTlv.SetPtEtaPhiM( dsStar_gen_pt, dsStar_gen_eta, dsStar_gen_phi, dsStarFromDs->mass() ); //changed
+               //TLorentzVector nu_old = genBsTlv - genMuTlv - genDsStarTlv; 
+
+               //std::cout << "OLD nu_gen_pt="    << nu_old.Pt()    << " "
+               //          << "OLD nu_gen_eta="   << nu_old.Eta()   << " "
+               //          << "OLD nu_gen_phi="   << nu_old.Phi()   << " "
+               //          << "OLD nu_gen_m="     << nu_old.M()    << " "
+               //          << "OLD nu_gen_E="     << nu_old.E()     << " " << std::endl;
+               
              }
+
 
              else if (sigId == 11){
 
@@ -690,12 +791,21 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
 
                // get the Ds* (we know its there)
                auto dsStarFromDs = getAncestor(dsFromPi,433);
+               auto nuFromBs     = getDaughter(bsFromMu, 16, 15);
 
                dsStar_gen_pt     = dsStarFromDs->pt();
                dsStar_gen_eta    = dsStarFromDs->eta();
                dsStar_gen_phi    = dsStarFromDs->phi();
                dsStar_gen_m      = dsStarMass_; 
                dsStar_gen_pdgid  = dsStarFromDs->pdgId();
+
+               nu_gen_pt    = nuFromBs->pt();
+               nu_gen_eta   = nuFromBs->eta();
+               nu_gen_phi   = nuFromBs->phi();
+               nu_gen_m     = 0.0;
+               nu_gen_pdgid = nuFromBs->pdgId();
+
+
 
              }
 
@@ -713,6 +823,13 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
                dsStar_gen_m      = std::nan("nan");
                dsStar_gen_pdgid  = -9999;
 
+               nu_gen_pt    = std::nan("nan");
+               nu_gen_eta   = std::nan("nan");
+               nu_gen_phi   = std::nan("nan");
+               nu_gen_m     = std::nan("nan");
+               nu_gen_pdgid = -9999;
+               
+
              }
 
 
@@ -727,6 +844,18 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              gen.addUserFloat("dsStar_gen_phi",     dsStar_gen_phi);
              gen.addUserFloat("dsStar_gen_m",       dsStar_gen_m);
              gen.addUserInt("dsStar_gen_pdgid",   dsStar_gen_pdgid);
+
+             gen.addUserFloat("nu_gen_pt",      nu_gen_pt);
+             gen.addUserFloat("nu_gen_eta",     nu_gen_eta);
+             gen.addUserFloat("nu_gen_phi",     nu_gen_phi);
+             gen.addUserFloat("nu_gen_m",       nu_gen_m);
+             gen.addUserInt("nu_gen_pdgid",   nu_gen_pdgid);
+             
+
+             
+
+
+               
 
 
 
@@ -810,6 +939,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              gen.addUserInt("sig",sigId);
              gen.addUserInt("b_mother_id",bId);
              gen.addUserInt("gen_match_success",genMatchSuccess);
+             gen.addUserInt( "same_mother"  , sameMother);
 
              ret_value->emplace_back(gen);
              //std::cout << "i have size nr:" << ret_value->size() << std::endl;
@@ -817,6 +947,7 @@ void inspectorGEN::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSe
              //std::cout << "k1 pt:" << k1PtrGen->pt() << std::endl;
              //std::cout << "k2 pt:" << k2PtrGen->pt() << std::endl;
              //std::cout << "mu pt:" << muPtrGen->pt() << std::endl;
+             std::cout << "SAVING!!!" << std::endl;
              //////////////////////////////////////////////////
 
            }//close gen matching pi loop 

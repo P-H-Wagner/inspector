@@ -157,6 +157,8 @@ inspectorVariables = cms.PSet(
         sig               = Var("userInt('sig')",int),
         b_mother_id       = Var("userInt('b_mother_id')",int),
 
+        same_mother       = Var("userInt('same_mother')",int),
+
 )
 
 hammerVariables = cms.PSet(
@@ -172,6 +174,12 @@ hammerVariables = cms.PSet(
         dsStar_phi     = Var("userFloat('dsStar_gen_phi')",float),
         dsStar_m       = Var("userFloat('dsStar_gen_m')",float),
         dsStar_pdgid   = Var("userInt('dsStar_gen_pdgid')",int),
+
+        nu_pt      = Var("userFloat('nu_gen_pt')",float),
+        nu_eta     = Var("userFloat('nu_gen_eta')",float),
+        nu_phi     = Var("userFloat('nu_gen_phi')",float),
+        nu_m       = Var("userFloat('nu_gen_m')",float),
+        nu_pdgid   = Var("userInt('nu_gen_pdgid')",int),
 
 
 )

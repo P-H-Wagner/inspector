@@ -343,8 +343,15 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
              auto bsFromDs = getAncestor(dsFromPhi,bMotherId);
              auto bsFromMu = getAncestor(muReco,   bMotherId);
 
-             if( (bsFromDs != bsFromMu) || (bsFromDs == nullptr) || (bsFromMu == nullptr)) continue; 
+             //if( (bsFromDs != bsFromMu) || (bsFromDs == nullptr) || (bsFromMu == nullptr)) continue; 
  
+             if(  (bsFromDs == nullptr) || (bsFromMu == nullptr)) continue;
+             int sameMother = 0;
+             if (bsFromDs == bsFromMu) sameMother = 1;
+             if (sameMother == 0 ) std::cout << "not the same mom!!" << std::endl;
+ 
+             //std::cout << "found a b mom!" << std::endl;
+
              nFoundB++;
              
              //if (bsFromMu->mass() > maxBsMass_) continue;
@@ -727,10 +734,10 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
              if (abs(bMotherId) == 531) checkSignal = isSignal(bsFromMu); 
              if (abs(bMotherId) == 521) checkKNuMu  = isKNuMu(bsFromMu); 
 
-             if (checkSignal==-1){
-               std::cout << "this is not tagged as signal" << std::endl;
-               printDaughters(bsFromMu);
-             }
+             //if (checkSignal==-1){
+             //  std::cout << "this is not tagged as signal" << std::endl;
+             //  printDaughters(bsFromMu);
+             //}
 
 
 
@@ -926,6 +933,7 @@ void inspector::produce(edm::StreamID, edm::Event &iEvent, const edm::EventSetup
              gen.addUserInt("sig",sigId);
              gen.addUserInt("b_mother_id",bId);
              gen.addUserInt("gen_match_success",genMatchSuccess);
+             gen.addUserInt( "same_mother"  , sameMother);
 
              ret_value->emplace_back(gen); //append gen particle
              //////////////////////////////////////////////////
